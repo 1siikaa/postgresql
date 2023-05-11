@@ -4,12 +4,27 @@
 .) Open-source
 .) Robust 
 .) High performance
+.) Complex SQL queries
+.) SQL Sub-selects
+.) Foreign keys
+.) Trigger
+.) Views
+.) Transactions
+.) Multiversion concurrency control (MVCC)
+.) Streaming Replication (as of 9.0)
+.) Hot Standby (as of 9.0)
+.) Data types
+.) Functions
+.) Operators
+.) Aggregate functions
+.) Index methods
 
 
 ## PostgreSQL 
 ```yml
+(FATHER OF POSTGRES : Michael Stonebraker.)
 Postgres or Postgresql is a sql type of relational database. And PostgreSQL uses sql language to allow us to work with database for
-data manipulation and for other crud operations. ( In 30+ Active Development )
+data manipulation and for other crud operations. ( It has more than 15 years of active development )
 ```
 
 ## SQL 
@@ -64,8 +79,9 @@ Postgress will automatically sets the id if we are adding a new row to the table
 
 
 # Important 
-
-
+```YML
+Using psql, you can generate a complete list of commands by using the \help command. For the syntax of a specific command, use the following command −---> postgres-# \help <command_name>
+```
 
 
 
