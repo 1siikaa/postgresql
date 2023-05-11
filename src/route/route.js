@@ -5,6 +5,10 @@ const studentController = require('../controller/studentcontroller.js')
 
 // ------------------------------------------------------------------- routing starts -------------------------------------------
 router.get('/getAllStudents', studentController.getStudents);
+router.get('/getAStudent/:id', studentController.getStudentById);
+
+router.post('/addStudent', studentController.addStudent);
+
 
 
 

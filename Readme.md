@@ -1,4 +1,5 @@
 # PostgreSQL Features
+```yml
 .) Object-relational database management system.
 .) Modern 
 .) Open-source
@@ -11,13 +12,14 @@
 .) Views
 .) Transactions
 .) Multiversion concurrency control (MVCC)
-.) Streaming Replication (as of 9.0)
-.) Hot Standby (as of 9.0)
+.) Streaming Replication 
+.) Hot Standby
 .) Data types
 .) Functions
 .) Operators
 .) Aggregate functions
 .) Index methods
+```
 
 
 ## PostgreSQL 
@@ -101,10 +103,14 @@ practice(# week week);
 
 
 ## Table creation 3 including foreign key
+
+### CUSTOMER TABLE
 CREATE TABLE Customers( customer_id INT PRIMARY KEY,
 practice(# name VARCHAR(50),
 practice(# email VARCHAR(50));
 CREATE TABLE
+
+### ORDER TABLE
 practice=# CREATE TABLE Orders(
 practice(# order_id INT PRIMARY KEY,
 practice(# customer_id INT,
