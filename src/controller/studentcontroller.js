@@ -1,8 +1,10 @@
 const pool = require('../../db')
+const dbquery = require('../../query');
 
+// ------------------------------------------------------------- Fetching all students data ---------------------------------------------
 const getStudents = async (req, res)=>{
 try{
-pool.query("SELECT * FROM students", (error, results)=>{
+pool.query(dbquery.getAllStudents, (error, results)=>{
     if(error){
             res.send({"message":error.message});
         }
@@ -13,6 +15,9 @@ catch(err){
     res.send({"message":err.message});
 }
 }
+
+
+
 
 module.exports = {
     getStudents
