@@ -182,8 +182,18 @@ space to null
                                                         .) VARCHAR(n) ..... is the variable-length character string.Similar to CHAR(n), it can store “n” length data. But unlike CHAR(n) no padding is done in case the data length is smaller than the value of “n”.
                                                         .) TEXT ..... is the variable-length character string. It can store data with unlimited length.
 
-3) 
+3)  By default, when the table name is not given, Sequelize automatically pluralizes the model name and uses that as the table name. This pluralization is done under the hood by a library called inflection, so that irregular plurals (such as person -> people) are computed correctly.
+
+4) DataTypes.STRING             // VARCHAR(255)
+DataTypes.STRING(1234)       // VARCHAR(1234)
+DataTypes.STRING.BINARY      // VARCHAR BINARY
+DataTypes.TEXT               // TEXT
+DataTypes.TEXT('tiny')       // TINYTEXT
+DataTypes.CITEXT             // CITEXT          PostgreSQL and SQLite only.
+DataTypes.TSVECTOR           // TSVECTOR        PostgreSQL only.
 
   ```
+
+
 
 

@@ -1,14 +1,15 @@
+// ------------------------------------------------- imports -----------------------------------------------------
 const Student = require('../model/studentModel')
 const {validateName, validateAge, validateDate, validateEmail, validatePassword} = require('../validation/validateStudent')
 
-
+// ------------------------------------------------- validation -----------------------------------------------------
 const checkIfStudentAlreadyExists = async(req, res, next)=>{
     try{
     const {email} = req.body
-    const student = await Student.findAll({email : email});
-    console.log(student)
-    if(student.length !== 0){
-       return res.status(409).send({message:"Student already exists"});
+    const student = await Student.findOne({ where: { email: email} });
+    console.log(student);
+    if (student !== null) {
+      return res.status(409).send({ message: "Student already exist" });
     }
     next();
     }
@@ -17,7 +18,20 @@ const checkIfStudentAlreadyExists = async(req, res, next)=>{
     }
 }
 
-
+// ------------------------------------------------- student not found ----------------------------------------------------
+const studentNotFound = async(req, res, next)=>{
+    try{
+        const id = req.params.id;
+        const student = await Student.findOne({where:{id: id}});
+        if(student === null){
+          return res.status(404).send({ message: "No student found with this id " });
+        }
+    next();
+    }
+    catch(err){
+            return res.status(500).send({message:err.message});
+        }}
+// ------------------------------------------------- validate student -----------------------------------------------------
 const validateStudent = async(req, res, next)=>{
     try{
     if(!Object.keys(req.body)){
@@ -49,13 +63,10 @@ const validateStudent = async(req, res, next)=>{
 }
 catch(err){
 return res.status(500).send({"message": err.message});
-}
-    }
+}}
 
 
-
-
-
+// ------------------------------------------------------ exports ---------------------------------------------------
 module.exports = {
-    checkIfStudentAlreadyExists, validateStudent
+    checkIfStudentAlreadyExists, validateStudent, studentNotFound
 }
