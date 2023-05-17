@@ -1,6 +1,6 @@
 // ------------------------------------------------- imports -----------------------------------------------------
-const Student = require('../model/studentModel')
-const {validateName, validateAge, validateDate, validateEmail, validatePassword} = require('../validation/validateStudent')
+const Student = require('../model/studentmodel')
+const {validateName, validateAge, validateDate, validateEmail, validatePassword} = require('../validation/validatingStudent')
 
 // ------------------------------------------------- validation -----------------------------------------------------
 const checkIfStudentAlreadyExists = async(req, res, next)=>{

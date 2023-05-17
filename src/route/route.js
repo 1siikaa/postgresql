@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const studentController = require('../controller/studentcontroller.js');
-const {checkIfStudentAlreadyExists, validateStudent, studentNotFound} = require('../middleware/studentValidation.js');
+const {checkIfStudentAlreadyExists, validateStudent, studentNotFound} = require('../middleware/studentvalidation.js');
 // ------------------------------------------------------------------- routing starts -------------------------------------------
 
 // get requests ---------------------------------------------------------------------------------------------------------------------
@@ -26,4 +26,3 @@ router.delete('/deleteAllStudent', studentController.deleteAllStudent);
 
 // -------------------------------------------------------------------------- exports --------------------------------------------
 module.exports = router;
-

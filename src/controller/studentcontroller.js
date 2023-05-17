@@ -1,5 +1,5 @@
 // ------------------------------------------------------------- Imports ----------------------------------------------
-const Student = require('../model/studentModel');
+const Student = require('../model/studentmodel');
 const { Sequelize, Op } = require("sequelize");
 
 // ------------------------------------------------------------- Fetching all students data ---------------------------------------------
@@ -19,18 +19,22 @@ const getStudents = async(req, res) => {
 
 // ------------------------------------------------------------- Fetching a student data ---------------------------------------------
 
+
 const getStudentById = async(req, res) => {
   try {
-    const oneStudent = await Student.findAll({"id":req.params.id});
+    const oneStudent = await Student.findOne({where:{id:req.params.id}});
+    
     console.log(oneStudent);
-    if(oneStudent.length === 0){
+    
+    if(!oneStudent){
       return res.status(404).send({ message: "No student found with this id " });
     }
     return res.status(200).json(oneStudent);
   
   } catch (err) {
-    return res.satus(500).send({ message: err.message });
+    return res.status(500).send({ message: err.message });
   }
+  
 };
 
 // ------------------------------------------------------------- Inserting a student data ---------------------------------------------
@@ -95,7 +99,7 @@ if (student !== null) {
 const deleteStudent = async (req, res) => {
   try{
     const deletedStudent = await Student.destroy({where:{id:req.params.id}});
-    if(!deletedStudent)
+   
     return res.status(200).send({"message": "student deleted successfully"});
   }
   catch(err){
