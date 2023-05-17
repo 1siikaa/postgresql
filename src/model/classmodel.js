@@ -3,13 +3,10 @@ const sequelize = require('../../db')
 const { DataTypes, Model } = require("sequelize");
   // ----------------------------------------------- schema definitions --------------------------------------
 const Class = sequelize.define("Classes", {
-  classId : {
+  totalStudents:{
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Students",
-      key: "id",
-  }},
+        defaultValue: 0,
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW

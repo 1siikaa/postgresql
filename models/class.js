@@ -14,13 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Class.init({
-    classId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "Students",
-        key: "id",
-    }},
+    classId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Class',

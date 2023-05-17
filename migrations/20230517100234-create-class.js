@@ -9,13 +9,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      classId: {
+      totalStudents:{
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: {
-          model: "Students",
-          key: "id",
-      }},
+        },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

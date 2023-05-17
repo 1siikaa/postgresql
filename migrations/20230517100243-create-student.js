@@ -15,30 +15,33 @@ module.exports = {
       email: {
         type: Sequelize.STRING
       },
+      classId : {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Classes",
+          key: "id",
+      }},
       age: {
         type: Sequelize.INTEGER
       },
       dob: {
         type: Sequelize.DATE
       },
-      isDeleted :{
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
-      },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        default: new Date
+        type: Sequelize.DATE
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue : new Date
+        type: Sequelize.DATE
       },
-      deletedAt: {
-        type: Sequelize.DATE,
-        defaultValue: null
-      }
+      isDeleted:{
+        type:Sequelize.BOOLEAN
+        },
+        deletedAt: {
+            type: Sequelize.DATE,
+          }
     });
   },
   async down(queryInterface, Sequelize) {
