@@ -14,6 +14,10 @@ const forName = function (name) {
     if (nameRegex.test(name)) return true
   };
 
+  const validateStudentId = (id)=>{
+    if(Number.isInteger(id)) return true
+  }
+
 // -------------------------------------------------- validating email addresses ------------------------------------
 const validateEmail = (email) => {
     let emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -22,7 +26,7 @@ const validateEmail = (email) => {
 
 // --------------------------------------------------- validating password -------------------------------------------
 const validateClassId = (classId) => {
-   if(classId >= 1 || classId<=12) return true
+   if((classId >= 1 || classId<=12) && Number.isInteger) return true
   
 }
 // ---------------------------------------------------- validating date ----------------------------------------------------
@@ -40,5 +44,5 @@ if(age>=0 && age<=100){
 
 // ---------------------------------------------------- exports -----------------------------------------------------------------
 module.exports = {
-    validateName, validateEmail, validateDate, validateAge, validateClassId, forName
+    validateName, validateEmail, validateDate, validateAge, validateClassId, forName, validateStudentId
 }

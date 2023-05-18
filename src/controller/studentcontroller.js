@@ -3,14 +3,14 @@ const sequelize = require('../../db')
 const { Sequelize, Op } = require("sequelize");
 const Student = require('../../models/student')(sequelize, Sequelize);
 const Class = require('../../models/class')(sequelize, Sequelize);
-
+const {validateAge, validateClassId, validateStudentId} = require('../validation/validatingStudent')
 
 
 // ------------------------------------------------------------- Fetching all students data ---------------------------------------------
 
 const getStudents = async(req, res) => {
   try {
-    const students = await Student.findAll();
+    const students = await Student.findAll({where:{isDeleted:false}});
         if(students.length===0){
         return res.status(400).send({ message: "no data found." });
         }
@@ -26,7 +26,10 @@ const getStudents = async(req, res) => {
 
 const getStudentById = async(req, res) => {
   try {
-    const oneStudent = await Student.findOne({where:{id:req.params.id}});
+    if(validateStudentId(req.params.id)){
+     return res.status(400).send({ status:false, message: "studentId is not valid."});
+    }
+    const oneStudent = await Student.findOne({where:{id:req.params.id, isDeleted:false}});
     
     if(!oneStudent){
       return res.status(404).send({ message: "No student found with this id " });
@@ -42,6 +45,9 @@ const getStudentById = async(req, res) => {
 // ------------------------------------------------------------- Inserting a student data ---------------------------------------------
 const addStudent = async (req, res) => {
   try {
+    if(!Object.keys(req.body).length){
+      return res.status(400).send({status:false, message: "provide all the mandatory fields." });
+    }
     const { name, email, age, dob, classId } = req.body;
     const classInstance = await Class.findByPk(classId);
 
@@ -54,7 +60,13 @@ const addStudent = async (req, res) => {
     if (student !== null) {
       return res.status(409).send({ message: "Student already exists" });
     }
+    if(!validateAge(age)){
+      return res.status(400).send({ message: "Invalid age" });
+    }
 
+    if(!validateClassId(classId)){
+      return res.status(400).send({ message: "Invalid class id" });
+    }
     const newStudent = await Student.create({
       name,
       email,
@@ -82,11 +94,19 @@ const addStudent = async (req, res) => {
 // ------------------------------------------------------------- Updating a Student data ------------------------------------
 const updateStudent = async (req, res) => {
   try {
+   
+    if(!Object.keys(req.body).length){
+      return res.status(200).send({ message: "Student is already updated." });
+    }
+    if(!validateAge(age)){
+      return res.status(400).send({ message: "Invalid age" });
+    }
+
     const { name, age, dob} = req.body;
      let updatedAt = Date.now();
      await Student.update(
       { name, age, dob,updatedAt},
-      { where: { id: req.params.id } }
+      { where: { id: req.params.id , isDeleted:false} }
     );
     
     const student = await Student.findByPk(req.params.id);
@@ -132,7 +152,7 @@ const deleteStudent = async (req, res) => {
    
 
     const updatedStudentList = classInstance.studentList.map((s) =>
-      s.id === student.id ? `student deleted with id {req.params.id}` : s
+      s.id === student.id ? `student deleted with id ${req.params.id}` : s
     );
     const updatedTotalStudents = classInstance.totalStudents-1;
 
