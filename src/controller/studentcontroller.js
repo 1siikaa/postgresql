@@ -60,11 +60,11 @@ const addStudent = async (req, res) => {
     if (student !== null) {
       return res.status(409).send({ message: "Student already exists" });
     }
-    if(!validateAge(age)){
+    if(age && !validateAge(age)){
       return res.status(400).send({ message: "Invalid age" });
     }
 
-    if(!validateClassId(classId)){
+    if(classId && !validateClassId(classId)){
       return res.status(400).send({ message: "Invalid class id" });
     }
     const newStudent = await Student.create({
@@ -98,11 +98,12 @@ const updateStudent = async (req, res) => {
     if(!Object.keys(req.body).length){
       return res.status(200).send({ message: "Student is already updated." });
     }
-    if(!validateAge(age)){
-      return res.status(400).send({ message: "Invalid age" });
-    }
+    
 
     const { name, age, dob} = req.body;
+    if(age && !validateAge(age)){
+      return res.status(400).send({ message: "Invalid age" });
+    }
      let updatedAt = Date.now();
      await Student.update(
       { name, age, dob,updatedAt},

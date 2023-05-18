@@ -26,7 +26,7 @@ const validateEmail = (email) => {
 
 // --------------------------------------------------- validating password -------------------------------------------
 const validateClassId = (classId) => {
-   if((classId >= 1 || classId<=12) && Number.isInteger) return true
+   if((classId >= 1 || classId<=12) && Number.isInteger(classId)) return true
   
 }
 // ---------------------------------------------------- validating date ----------------------------------------------------
