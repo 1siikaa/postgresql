@@ -1,15 +1,19 @@
 // ------------------------------------------------------------- Imports ----------------------------------------------
-const Student = require('../model/studentmodel');
+const sequelize = require('../../db')
 const { Sequelize, Op } = require("sequelize");
+const Student = require('../../models/student')(sequelize, Sequelize);
+const Class = require('../../models/class')(sequelize, Sequelize);
+
+
 
 // ------------------------------------------------------------- Fetching all students data ---------------------------------------------
+
 const getStudents = async(req, res) => {
   try {
     const students = await Student.findAll();
         if(students.length===0){
-        return res.status(400).send({ message: error.message });
+        return res.status(400).send({ message: "no data found." });
         }
-      
       return res.status(200).json(students);
     
   } catch (err) {
@@ -23,8 +27,6 @@ const getStudents = async(req, res) => {
 const getStudentById = async(req, res) => {
   try {
     const oneStudent = await Student.findOne({where:{id:req.params.id}});
-    
-    console.log(oneStudent);
     
     if(!oneStudent){
       return res.status(404).send({ message: "No student found with this id " });
@@ -40,20 +42,33 @@ const getStudentById = async(req, res) => {
 // ------------------------------------------------------------- Inserting a student data ---------------------------------------------
 const addStudent = async (req, res) => {
   try {
-    const { name, email, age, dob, createdAt, updatedAt } = req.body;
+    const { name, email, age, dob, classId } = req.body;
+    const classInstance = await Class.findByPk(classId);
+
+    if (!classInstance) {
+      return res.status(404).send({ message: "Class not found" });
+    }
 
     const student = await Student.findOne({ where: { email: email } });
-    console.log(student);
+
     if (student !== null) {
       return res.status(409).send({ message: "Student already exists" });
     }
+
     const newStudent = await Student.create({
       name,
       email,
+      classId,
       age,
-      dob,
-      createdAt,
-      updatedAt,
+      dob
+    });
+
+    const updatedStudentList = [...classInstance.studentList, newStudent];
+    const updatedTotalStudents = classInstance.totalStudents + 1;
+
+    await classInstance.update({
+      studentList: updatedStudentList,
+      totalStudents: updatedTotalStudents,
     });
 
     return res.status(201).send({ message: "Student added successfully" });
@@ -63,88 +78,103 @@ const addStudent = async (req, res) => {
   }
 };
 
+
 // ------------------------------------------------------------- Updating a Student data ------------------------------------
 const updateStudent = async (req, res) => {
   try {
-    const { name, email, age, dob } = req.body;
-const student = await Student.findOne({
-  where: {
-    email: email,
-    id: {
-      [Op.not]: req.params.id // Exclude the student with req.params.id
-    }
-  }
-});
-console.log(student);
-if (student !== null) {
-  return res.status(409).send({ message: "Student already exists with this email" });
-}
-    const updatedStudent = await Student.update(
-      { name, email, age, dob },
+    const { name, age, dob} = req.body;
+     let updatedAt = Date.now();
+     await Student.update(
+      { name, age, dob,updatedAt},
       { where: { id: req.params.id } }
     );
+    
+    const student = await Student.findByPk(req.params.id);
+    const classInstance = await Class.findByPk(student.classId);
 
-    if (updatedStudent[0] === 0) {
-      return res.status(404).send({ message: "Student not found" });
+    if (!classInstance) {
+      return res.status(404).send({ message: "Class not found" });
     }
 
-    return res.status(200).send({ message: "Student updated successfully" });
+    const updatedStudentList = classInstance.studentList.map((s) =>
+      s.id === student.id ? student : s
+    );
+
+    await classInstance.update({ studentList: updatedStudentList });
+
+
+    return res.status(200).send({ message: "Student updated successfully"});
   } catch (err) {
     return res.status(500).send({ message: err.message });
   }
 };
 
 
+
 // ------------------------------------------------------------- Deleting a student data ------------------------------------
 const deleteStudent = async (req, res) => {
-  try{
-    const deletedStudent = await Student.destroy({where:{id:req.params.id}});
-   
-    return res.status(200).send({"message": "student deleted successfully"});
-  }
-  catch(err){
-    return res.status(500).send({ message: err.message });
-  }}
-
-// ------------------------------------------------------------- Deleting all Student's data --------------------------------
-const deleteAllStudent = async (req, res) => {
   try {
-      if(!Object.keys(req.query).length){
-      await Student.destroy({ where: {} }); // Empty where condition to delete all students
-      return res.status(200).send({ message: "All students deleted successfully" });
-      }
-      else{
-      const deletedStudents = await Student.destroy({ where: {}  });
-      if(!deletedStudents)
-      return res.status(200).send({ message: "All these students deleted successfully" });
-      }
+  
+    await Student.update(
+      { isDeleted: true, deletedAt: Date.now() },
+      { where: { id: req.params.id } }
+    );
+    const student = await Student.findByPk(req.params.id);
+    
 
-    } catch (err) {
-      return res.status(500).send({ message: err.message });
+    const classInstance = await Class.findByPk(student.classId);
+   console.log(classInstance.Classes)
+   
+    if (!classInstance) {
+      return res.status(404).send({ message: "Class not found" });
     }
+
    
 
-}
+    const updatedStudentList = classInstance.studentList.map((s) =>
+      s.id === student.id ? `student deleted with id {req.params.id}` : s
+    );
+    const updatedTotalStudents = classInstance.totalStudents-1;
+
+    await classInstance.update({
+      studentList: updatedStudentList,
+      totalStudents: updatedTotalStudents,
+    });
+
+    return res.status(200).send({ message: "Student deleted successfully" });
+  } catch (err) {
+    return res.status(500).send({ message: err.message });
+  }
+};
+
+
 // ------------------------------------------------------------- Fetching the list of all Students --------------------------
 const fetchStudentList = async (req, res) => {
   try {
     const students = await Student.findAll({
+      where: {
+        isDeleted: false
+      },
       attributes: ['name'], // Specify the 'name' attribute only
     });
 
-    const studentCount = await Student.count(); // Count the number of students
+    const studentCount = await Student.count({
+      where: {
+        isDeleted: false
+      }
+    }); // Count the number of students with isDeleted as false
 
     if (students.length === 0) {
       return res.status(400).send({ message: "No students found" });
     }
 
     const studentNames = students.map((student) => student.name);
-
     return res.status(200).json({ count: studentCount, students: studentNames });
   } catch (err) {
     return res.status(500).send({ message: err.message });
   }
-}
+};
+
 
 
 // -------------------------------------------------------------- exports -------------------------------------------
@@ -154,6 +184,5 @@ module.exports = {
   addStudent,
   updateStudent,
   deleteStudent,
-  deleteAllStudent,
   fetchStudentList
 };

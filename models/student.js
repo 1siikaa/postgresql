@@ -16,16 +16,25 @@ module.exports = (sequelize, DataTypes) => {
   Student.init({
     name: DataTypes.STRING,
     email: DataTypes.STRING,
+    classId : {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Classes",
+        key: "id",
+    }},
     age: DataTypes.INTEGER,
     dob: DataTypes.DATE,
-    isDeleted:DataTypes.BOOLEAN
+    isDeleted:{
+      type:DataTypes.BOOLEAN,
+      defaultValue:false}
       ,
       deletedAt:DataTypes.DATE,
         createdAt: DataTypes.DATE,
         updatedAt: DataTypes.DATE
   }, {
     sequelize,
-    modelName: 'Student',
+    modelName: 'Students',
   });
   return Student;
 };

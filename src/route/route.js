@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const studentController = require('../controller/studentcontroller.js');
+const classController = require('../controller/classcontroller.js');
 const {checkIfStudentAlreadyExists, validateStudent, studentNotFound} = require('../middleware/studentvalidation.js');
 // ------------------------------------------------------------------- routing starts -------------------------------------------
 
@@ -12,8 +13,12 @@ router.get('/getAStudent/:id', studentController.getStudentById);
 
 router.get('/getStudentList', studentController.fetchStudentList);
 
+router.get('/getClasses', classController.getClassDetails);
+
 // post requests --------------------------------------------------------------------------------------------------------------------
 router.post('/addStudent', validateStudent, checkIfStudentAlreadyExists, studentController.addStudent);
+
+router.post('/addClass', classController.addClass);
 
 // put requests ------------------------------------------------------------------------------------------------
 router.put('/udateStudent/:id', validateStudent, studentNotFound, studentController.updateStudent);
@@ -21,7 +26,6 @@ router.put('/udateStudent/:id', validateStudent, studentNotFound, studentControl
 // delete requests --------------------------------------------------------------------------------------------------------------------
 router.delete('/deleteStudent/:id', studentNotFound, studentController.deleteStudent);
 
-router.delete('/deleteAllStudent', studentController.deleteAllStudent);
 
 
 // -------------------------------------------------------------------------- exports --------------------------------------------

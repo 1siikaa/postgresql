@@ -13,6 +13,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         },
+        studentList: {
+          type: Sequelize.ARRAY(Sequelize.JSONB),
+          defaultValue: [],
+        },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

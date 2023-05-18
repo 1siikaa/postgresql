@@ -21,15 +21,14 @@ const validateEmail = (email) => {
 }
 
 // --------------------------------------------------- validating password -------------------------------------------
-const validatePassword = (password) => {
-    let passwordregex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,15}$/
-    if (passwordregex.test(password)) return true
+const validateClassId = (classId) => {
+   if(classId >= 1 || classId<=12) return true
   
 }
 // ---------------------------------------------------- validating date ----------------------------------------------------
-const validateDate = (date) => {
-   let dateregex = /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/
-   if (dateregex.test(date)) return true
+const validateDate = (dob) => {
+   let dateregex = /^\d{4}\/\d{2}\/\d{2}$/
+   if (dateregex.test(dob)) return true
 }
 
 // ---------------------------------------------------- validating age --------------------------------------------------------------
@@ -41,5 +40,5 @@ if(age>=0 && age<=100){
 
 // ---------------------------------------------------- exports -----------------------------------------------------------------
 module.exports = {
-    validateName, validateEmail, validateDate, validateAge, validatePassword, forName
+    validateName, validateEmail, validateDate, validateAge, validateClassId, forName
 }

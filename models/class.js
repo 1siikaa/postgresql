@@ -14,10 +14,17 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Class.init({
-    classId: DataTypes.INTEGER
+    totalStudents:{
+      type: DataTypes.INTEGER,
+          defaultValue: 0,
+    },
+    studentList: {
+      type: DataTypes.ARRAY(DataTypes.JSONB),
+      defaultValue: [],
+    },
   }, {
     sequelize,
-    modelName: 'Class',
+    modelName: 'Classes',
   });
   return Class;
 };
