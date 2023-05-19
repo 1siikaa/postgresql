@@ -8,13 +8,13 @@ const addClass = async(req, res) => {
     try {
       const classes = await Class.findAll();
       if(classes.length>12){
-      return res.status(400).send({ message: "classes can be 1 to 12 only." });
+      return res.status(400).send({ status:false, message: "classes can be 1 to 12 only." });
       }
       await Class.create({totalStudents:0});
-      return res.status(201).send({ message: "Class added successfully" });
+      return res.status(201).send({status:true, message: "Class added successfully" });
       
     } catch (err) {
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({status:false, message: err.message });
     }
   };
 
@@ -25,10 +25,10 @@ const addClass = async(req, res) => {
             if(classes.length===0){
             return res.status(404).send({ message: "No classes found." });
             }
-          return res.status(200).json(classes);
+          return res.status(200).send({status:true, data:classes});
         
       } catch (err) {
-        return res.status(500).send({ message: err.message });
+        return res.status(500).send({status:false, message: err.message });
       }
   }
 
@@ -37,12 +37,12 @@ const addClass = async(req, res) => {
      
         const specificClass = await Class.findOne({where:{id: req.params.id}});
             if(!specificClass){
-            return res.status(404).send({ message: "No class found. Please enter a valid class Id." });
+            return res.status(404).send({status:false, message: "No class found." });
             }
-          return res.status(200).json(specificClass);
+          return res.status(200).send({status:true, data:specificClass});
         
       } catch (err) {
-        return res.status(500).send({ message: err.message });
+        return res.status(500).send({status:false, message: err.message });
       }
   }
   

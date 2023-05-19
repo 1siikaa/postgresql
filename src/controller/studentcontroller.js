@@ -13,9 +13,9 @@ const getStudents = async (req, res) => {
     if (!Object.keys(req.query).length) {
       const students = await Student.findAll({ where: { isDeleted: false } });
       if (students.length === 0) {
-        return res.status(400).send({ message: "No data found." });
+        return res.status(404).send({status:false,  message: "No data found." });
       }
-      return res.status(200).json(students);
+      return res.status(200).send({status:true, data:students});
     } else {
       if(['id', 'name', 'email', 'classId', 'age', 'dob'].includes(...Object.keys(req.query))){
       const { id, name, email, age, dob, classId } = req.query;
@@ -35,10 +35,8 @@ const getStudents = async (req, res) => {
         }
         searchConditions.email=  { [Op.iLike]: `%${email}%` };
       }
-      console.log(classId , typeof(classId))
-
+      
       if(classId){
-
         if(isNaN(classId)){
           return res.status(400).send({ status:false, message: "classId is not valid."});
         }
@@ -50,7 +48,9 @@ const getStudents = async (req, res) => {
       }
 
       if (age) {
-        validateAge(age); // validate the age if provided
+        if(isNaN(classId)){
+          return res.status(400).send({ status:false, message: "age is not valid."});
+        }   // validate the age if provided
         searchConditions.age = age;
       }
 
@@ -61,17 +61,17 @@ const getStudents = async (req, res) => {
       const students = await Student.findAll({ where: searchConditions });
 
       if (students.length === 0) {
-        return res.status(400).send({ message: "No matching data found." });
+        return res.status(404).send({status:false, message: "No matching data found." });
       }
 
-      return res.status(200).send({message:` ${students.length} matching results found`, data :students});
+      return res.status(200).send({status:true, message:` ${students.length} matching results found`, data :students});
     }
     else{
       return res.status(400).send({status:false, message: "query name can contain id, name, age, dob, email, classId parameter "})
     }
     }
   } catch (err) {
-    return res.status(500).send({ message: err.message });
+    return res.status(500).send({status:false, message: err.message });
   }
 };
 
@@ -84,12 +84,12 @@ const getStudentById = async(req, res) => {
     const oneStudent = await Student.findOne({where:{id:req.params.id, isDeleted:false}});
     
     if(!oneStudent){
-      return res.status(404).send({ message: "No student found with this id " });
+      return res.status(404).send({status:false, message: "No student found with this id " });
     }
-    return res.status(200).json(oneStudent);
+    return res.status(200).send({status:true, data:oneStudent});
   
   } catch (err) {
-    return res.status(500).send({ message: err.message });
+    return res.status(500).send({status:false, message: err.message });
   }
   
 };
@@ -102,20 +102,15 @@ const addStudent = async (req, res) => {
     const classInstance = await Class.findByPk(classId);
     name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/ /g, "");
     if (!classInstance) {
-      return res.status(404).send({ message: "Class not found" });
+      return res.status(404).send({status:false, message: "Class not found" });
     }
 
-    const student = await Student.findOne({ where: { email: email } });
-
-    if (student !== null) {
-      return res.status(409).send({ message: "Student already exists" });
-    }
     if(age && !validateAge(age)){
-      return res.status(400).send({ message: "Invalid age" });
+      return res.status(400).send({status: false, message: "Invalid age" });
     }
 
     if(classId && !validateClassId(classId)){
-      return res.status(400).send({ message: "Invalid class id" });
+      return res.status(400).send({status:false, message: "Invalid class id" });
     }
     const newStudent = await Student.create({
       name,
@@ -133,10 +128,10 @@ const addStudent = async (req, res) => {
       totalStudents: updatedTotalStudents,
     });
 
-    return res.status(201).send({ message: "Student added successfully" });
+    return res.status(201).send({status:true, message: "Student added successfully" });
   } catch (err) {
     console.error(err);
-    return res.status(500).send({ message: err.message });
+    return res.status(500).send({status:false, message: err.message });
   }
 };
 
@@ -145,12 +140,12 @@ const addStudent = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     if(!Object.keys(req.body).length){
-      return res.status(200).send({ message: "Student is already updated." });
+      return res.status(200).send({status:true, message: "Student is already updated." });
     }
     let { name, age, dob} = req.body;
     name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/ /g, "");
     if(age && !validateAge(age)){
-      return res.status(400).send({ message: "Invalid age" });
+      return res.status(400).send({status:false, message: "Invalid age" });
     }
      let updatedAt = Date.now();
      await Student.update(
@@ -160,21 +155,16 @@ const updateStudent = async (req, res) => {
     
     const student = await Student.findByPk(req.params.id);
     const classInstance = await Class.findByPk(student.classId);
-
-    if (!classInstance) {
-      return res.status(404).send({ message: "Class not found" });
-    }
-
     const updatedStudentList = classInstance.studentList.map((s) =>
       s.id === student.id ? student : s
     );
 
-    await classInstance.update({ studentList: updatedStudentList });
+    await classInstance.update({studentList: updatedStudentList });
 
 
-    return res.status(200).send({ message: "Student updated successfully"});
+    return res.status(200).send({status:true, message: "Student updated successfully"});
   } catch (err) {
-    return res.status(500).send({ message: err.message });
+    return res.status(500).send({status:false, message: err.message });
   }
 };
 
@@ -194,14 +184,6 @@ const deleteStudent = async (req, res) => {
     
 
     const classInstance = await Class.findByPk(student.classId);
-   console.log(classInstance.Classes)
-   
-    if (!classInstance) {
-      return res.status(404).send({ message: "Class not found" });
-    }
-
-   
-
     const updatedStudentList = classInstance.studentList.map((s) =>
       s.id === student.id ? `student deleted with id ${req.params.id}` : s
     );
@@ -212,9 +194,9 @@ const deleteStudent = async (req, res) => {
       totalStudents: updatedTotalStudents,
     });
 
-    return res.status(200).send({ message: "Student deleted successfully" });
+    return res.status(200).send({status:true, message: "Student deleted successfully" });
   } catch (err) {
-    return res.status(500).send({ message: err.message });
+    return res.status(500).send({status:false,  message: err.message });
   }
 };
 
@@ -236,13 +218,13 @@ const fetchStudentList = async (req, res) => {
     }); // Count the number of students with isDeleted as false
 
     if (students.length === 0) {
-      return res.status(400).send({ message: "No students found" });
+      return res.status(404).send({ status:false, message: "No students found" });
     }
 
     const studentNames = students.map((student) => student.name);
-    return res.status(200).json({ count: studentCount, students: studentNames });
+    return res.status(200).json({status:true, count: studentCount, data: studentNames });
   } catch (err) {
-    return res.status(500).send({ message: err.message });
+    return res.status(500).send({status:false, message: err.message });
   }
 };
 

@@ -11,12 +11,12 @@ const checkIfStudentAlreadyExists = async(req, res, next)=>{
     const {email} = req.body
     const student = await Student.findOne({ where: { email: email} });
     if (student !== null) {
-      return res.status(409).send({ message: "Student already exist" });
+      return res.status(409).send({status:false, message: "Student already exist" });
     }
     next();
     }
     catch(err){
-        return res.status(500).send({message:err.message});
+        return res.status(500).send({status:false, message:err.message});
     }
 }
 
@@ -32,12 +32,12 @@ const studentNotFound = async (req, res, next) => {
         }
       });
       if (!student) {
-        return res.status(404).send({ message: "No student found with this id." });
+        return res.status(404).send({status:false, message: "No student found with this id." });
       }
       req.userId = id;
       next();
     } catch (err) {
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({status:false, message: err.message });
     }
   };
 
