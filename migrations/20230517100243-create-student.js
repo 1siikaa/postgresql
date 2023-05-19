@@ -42,6 +42,9 @@ module.exports = {
         deletedAt: {
             type: Sequelize.DATE,
           }
+    },{
+      paranoid:true,
+      timestamps: true,
     });
   },
   async down(queryInterface, Sequelize) {

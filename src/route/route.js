@@ -4,30 +4,43 @@ const router = express.Router();
 const studentController = require('../controller/studentcontroller.js');
 const classController = require('../controller/classcontroller.js');
 const {checkIfStudentAlreadyExists, studentNotFound} = require('../middleware/studentvalidation.js');
-const {studentvalidation, updatevalidation} = require('../middleware/joiValidationMiddleware.js')
+const {authentication, authorization} = require('../middleware/auth.js')
+const {studentLogin} = require('../controller/signincontroller.js')
+const {studentvalidation, updatevalidation, paramsValidation, loginValidation} = require('../middleware/joiValidationMiddleware.js')
 // ------------------------------------------------------------------- routing starts -------------------------------------------
 
 // get requests ---------------------------------------------------------------------------------------------------------------------
 router.get('/getAllStudents', studentController.getStudents);
 
-router.get('/getAStudent/:id', studentController.getStudentById);
+router.get('/getAStudent/:id', paramsValidation, studentController.getStudentById);
 
 router.get('/getStudentList', studentController.fetchStudentList);
 
 router.get('/getClasses', classController.getClassDetails);
 
-router.get('/getClass/:id',  classController.getClass);
+router.get('/getClass/:id', paramsValidation,  classController.getClass);
 
 // post requests --------------------------------------------------------------------------------------------------------------------
-router.post('/addStudent', studentvalidation, checkIfStudentAlreadyExists, studentController.addStudent);
+router.post('/addStudent', studentvalidation, checkIfStudentAlreadyExists,   studentController.addStudent);
+
+router.post('/login', loginValidation, studentLogin)
 
 router.post('/addClass', classController.addClass);
 
 // put requests ------------------------------------------------------------------------------------------------
-router.put('/udateStudent/:id',studentNotFound, updatevalidation, studentController.updateStudent);
+router.put('/udateStudent/:id',  paramsValidation, updatevalidation, authentication, authorization, studentNotFound, studentController.updateStudent);
 
 // delete requests --------------------------------------------------------------------------------------------------------------------
-router.delete('/deleteStudent/:id', studentNotFound, studentController.deleteStudent);
+router.delete('/deleteStudent/:id',  paramsValidation,  authentication, authorization, studentNotFound, studentController.deleteStudent);
+
+
+// -------------------------------------------------------------------- route not found --------------------------------------------------------------
+
+router.all('/*', (req, res) => {
+    return res.status(404).json({
+        message: 'Page not found'
+    });
+});
 
 
 

@@ -1,7 +1,7 @@
 const sequelize = require('../../db')
 const { DataTypes, Model } = require("sequelize");
   // ----------------------------------------------- schema definitions --------------------------------------
-const Student = sequelize.define("Students", {
+const Student = sequelize.define("Students", {  //attributes
   name: DataTypes.STRING,
   email : DataTypes.STRING,
   classId : {
@@ -27,7 +27,13 @@ const Student = sequelize.define("Students", {
   deletedAt: {
       type: DataTypes.DATE,
     }
+}, {
+  paranoid:true,
+      timestamps: true,
 });
+// `sequelize.define` also returns the model
+console.log(Student === sequelize.models.Students);
+
 
   
 // ---------------------------------------------------- exports ----------------------------------------------------------

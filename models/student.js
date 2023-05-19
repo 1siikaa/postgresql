@@ -32,8 +32,12 @@ module.exports = (sequelize, DataTypes) => {
       deletedAt:DataTypes.DATE,
         createdAt: DataTypes.DATE,
         updatedAt: DataTypes.DATE
-  }, {
+  
+},
+   {
     sequelize,
+    paranoid: true,
+    timestamps: true,
     modelName: 'Students',
   });
   return Student;

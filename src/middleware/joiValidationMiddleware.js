@@ -13,5 +13,18 @@ module.exports = {
     if (error) {
       return res.status(400).send({ status: false, message: error.message });
     } else next();
+  },
+
+  paramsValidation : (req, res, next) => {
+    const { error } = validation.paramsValidation.validate(req.params);
+    if (error) {
+      return res.status(400).send({ status: false, message: error.message });
+    } else next();
+  },
+  loginValidation : (req, res, next) => {
+    const { error } = validation.loginValidation.validate(req.body);
+    if (error) {
+      return res.status(400).send({ status: false, message: error.message });
+    } else next();
   }
 };

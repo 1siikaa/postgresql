@@ -23,9 +23,7 @@ const checkIfStudentAlreadyExists = async(req, res, next)=>{
 // ------------------------------------------------- student not found ----------------------------------------------------
 const studentNotFound = async (req, res, next) => {
     try {
-        if(validateStudentId(req.params.id)){
-            return res.status(400).send({ status:false, message: "studentId is not valid."});
-           }
+      
       const id = req.params.id;
       const student = await Student.findOne({
         where: {
@@ -36,6 +34,7 @@ const studentNotFound = async (req, res, next) => {
       if (!student) {
         return res.status(404).send({ message: "No student found with this id." });
       }
+      req.userId = id;
       next();
     } catch (err) {
       return res.status(500).send({ message: err.message });

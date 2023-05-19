@@ -1,7 +1,7 @@
 const sequelize = require('../../db')
 const { Sequelize, Op } = require("sequelize");
 const Class = require('../../models/class')(sequelize, Sequelize);
-const {validateClassId} = require('../validation/validatingStudent')
+
 
 
 const addClass = async(req, res) => {
@@ -34,9 +34,7 @@ const addClass = async(req, res) => {
 
   const getClass = async(req, res) => {
     try {
-      if(validateClassId(req.params.id)){
-        return res.status(400).send({ status:false, message: "classId is not valid."});
-       }
+     
         const specificClass = await Class.findOne({where:{id: req.params.id}});
             if(!specificClass){
             return res.status(404).send({ message: "No class found. Please enter a valid class Id." });
