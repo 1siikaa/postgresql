@@ -9,25 +9,15 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      totalStudents:{
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        },
-        studentList: {
-          type: Sequelize.ARRAY(Sequelize.JSONB),
-          defaultValue: [],
-        },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
-    });
+      
+}, {
+    paranoid:true,
+    timestamps: true,
+});
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Classes');
   }
 };
+
+

@@ -1,15 +1,11 @@
-// ------------------------------------------------- imports -----------------------------------------------------
-const sequelize = require('../../db')
-const { Sequelize, Op } = require("sequelize");
-const Student = require('../../models/student')(sequelize, Sequelize);
-const {validateAge, validateClassId, validateStudentId} = require('../validation/validatingStudent')
+const db = require('../../models/index')
 
 
 // ------------------------------------------------- validation -----------------------------------------------------
 const checkIfStudentAlreadyExists = async(req, res, next)=>{
     try{
     const {email} = req.body
-    const student = await Student.findOne({ where: { email: email} });
+    const student = await db.Students.findOne({ where: { email: email} });
     if (student !== null) {
       return res.status(409).send({status:false, message: "Student already exist" });
     }
@@ -25,7 +21,7 @@ const studentNotFound = async (req, res, next) => {
     try {
       
       const id = req.params.id;
-      const student = await Student.findOne({
+      const student = await db.Students.findOne({
         where: {
           id: id,
           isDeleted: false

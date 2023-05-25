@@ -1,44 +1,29 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class Student extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
+
+  // ----------------------------------------------- schema definitions --------------------------------------
+  module.exports= (sequelize, DataTypes)=>{ const Student = sequelize.define("Students", {
+  name: DataTypes.STRING,
+  email : DataTypes.STRING,
+  classId : {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "Classes",
+      key: "id",
+  }},
+  age: DataTypes.INTEGER,
+  dob: DataTypes.DATE,
+  isDeleted:{
+  type:DataTypes.BOOLEAN
   }
-  Student.init({
-    name: DataTypes.STRING,
-    email: DataTypes.STRING,
-    classId : {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "Classes",
-        key: "id",
-    }},
-    age: DataTypes.INTEGER,
-    dob: DataTypes.DATE,
-    isDeleted:{
-      type:DataTypes.BOOLEAN,
-      defaultValue:false}
-      ,
-      deletedAt:DataTypes.DATE,
-        createdAt: DataTypes.DATE,
-        updatedAt: DataTypes.DATE
+} ,{paranoid:true,
+  timestamps:true})
+  Student.associate = (models) => {
+    Student.belongsTo(models.Classes, { foreignKey: 'classId', as: 'class' });
+  };
+  return Student
+  }
+// `sequelize.define` also returns the model
+//console.log(Student === sequelize.models.Students);
+
+
   
-},
-   {
-    sequelize,
-    paranoid: true,
-    timestamps: true,
-    modelName: 'Students',
-  });
-  return Student;
-};

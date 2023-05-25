@@ -1,16 +1,13 @@
-const sequelize = require('../../db')
-const { Sequelize, Op } = require("sequelize");
-const Class = require('../../models/class')(sequelize, Sequelize);
-
+const db = require('../../models/index')
 
 
 const addClass = async(req, res) => {
     try {
-      const classes = await Class.findAll();
-      if(classes.length>12){
-      return res.status(400).send({ status:false, message: "classes can be 1 to 12 only." });
+      const Classes = await db.Classes.findAll({where: {deletedAt : null}});
+      if(Classes.length>12){
+      return res.status(400).send({ status:false, message: "Classes can be 1 to 12 only." });
       }
-      await Class.create({totalStudents:0});
+      await db.Classes.create({totalStudents:0});
       return res.status(201).send({status:true, message: "Class added successfully" });
       
     } catch (err) {
@@ -21,11 +18,14 @@ const addClass = async(req, res) => {
 
   const getClassDetails = async(req, res) => {
     try {
-        const classes = await Class.findAll();
-            if(classes.length===0){
-            return res.status(404).send({ message: "No classes found." });
+        const Classes = await db.Classes.findAll({
+          where: {deletedAt : null},
+          include: [{ model: db.Students, as:'students' }] 
+        });
+            if(Classes.length===0){
+            return res.status(404).send({ message: "No Classes found." });
             }
-          return res.status(200).send({status:true, data:classes});
+          return res.status(200).send({status:true, data:Classes});
         
       } catch (err) {
         return res.status(500).send({status:false, message: err.message });
@@ -35,9 +35,11 @@ const addClass = async(req, res) => {
   const getClass = async(req, res) => {
     try {
      
-        const specificClass = await Class.findOne({where:{id: req.params.id}});
+        const specificClass = await db.Classes.findOne({where:{id: req.params.id, deletedAt : null}, 
+          include: [{ model: db.Students, as:'students' }]
+        });
             if(!specificClass){
-            return res.status(404).send({status:false, message: "No class found." });
+            return res.status(404).send({status:false, message: "No Class found." });
             }
           return res.status(200).send({status:true, data:specificClass});
         

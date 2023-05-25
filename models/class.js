@@ -1,30 +1,14 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class Class extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
+
+
+
+  // ----------------------------------------------- schema definitions --------------------------------------
+module.exports= (sequelize, DataTypes)=>{ const Class = sequelize.define("Classes", {
+  },{
+  timestamps:true})
+  Class.associate = (models) => {
+    Class.hasMany(models.Students, { foreignKey: 'classId', as: 'students' });
+  };
+  return Class
   }
-  Class.init({
-    totalStudents:{
-      type: DataTypes.INTEGER,
-          defaultValue: 0,
-    },
-    studentList: {
-      type: DataTypes.ARRAY(DataTypes.JSONB),
-      defaultValue: [],
-    },
-  }, {
-    sequelize,
-    modelName: 'Classes',
-  });
-  return Class;
-};
+
+  // ---------------------------------------------------- exports ----------------------------------------------------------

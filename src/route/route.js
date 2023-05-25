@@ -28,10 +28,10 @@ router.post('/login', loginValidation, studentLogin)
 router.post('/addClass', classController.addClass);
 
 // put requests ------------------------------------------------------------------------------------------------
-router.put('/udateStudent/:id',  paramsValidation, updatevalidation, authentication, authorization, studentNotFound, studentController.updateStudent);
+router.put('/udateStudent/:id',  paramsValidation, updatevalidation, authentication, studentNotFound, studentController.updateStudent);
 
 // delete requests --------------------------------------------------------------------------------------------------------------------
-router.delete('/deleteStudent/:id',  paramsValidation,  authentication, authorization, studentNotFound, studentController.deleteStudent);
+router.delete('/deleteStudent/:id',  paramsValidation,  authentication,  studentNotFound, studentController.deleteStudent);
 
 
 // -------------------------------------------------------------------- route not found --------------------------------------------------------------

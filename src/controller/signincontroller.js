@@ -1,6 +1,4 @@
-const sequelize = require('../../db')
-const { Sequelize, Op } = require("sequelize");
-const Student = require('../../models/student')(sequelize, Sequelize);
+const db = require('../../models/index') 
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
@@ -8,7 +6,7 @@ require('dotenv').config()
 const studentLogin = async function (req, res) {
     try {
 //=======creating Token by Jwt.sign Function
-     const student = await Student.findOne({where:{ email:req.body.email}})
+     const student = await db.Students.findOne({where:{ email:req.body.email}})
         if (!student) {
             return res.status(404).send({ status: false, message: "First register youself then sign in again !!" })
         }

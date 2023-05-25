@@ -1,23 +1,26 @@
 // ------------------------------------------------------------- Imports ----------------------------------------------
-const sequelize = require('../../db')
-const { Sequelize, Op } = require("sequelize");
-const Student = require('../../models/student')(sequelize, Sequelize);
-const Class = require('../../models/class')(sequelize, Sequelize);
+
+const db = require('../../models/index')
 const {validateAge, validateClassId, validateEmail} = require('../validation/validatingStudent')
+
 
 
 // ------------------------------------------------------------- Fetching all students data ---------------------------------------------
 
 const getStudents = async (req, res) => {
   try {
-    if (!Object.keys(req.query).length) {
-      const students = await Student.findAll({ where: { isDeleted: false } });
-      if (students.length === 0) {
-        return res.status(404).send({status:false,  message: "No data found." });
-      }
-      return res.status(200).send({status:true, data:students});
+      if (!Object.keys(req.query).length) {
+        const students = await db.Students.findAll({
+          where: { isDeleted: false },
+          include: [{ model: db.Classes, as: 'class' }] // Include the 'Classes' model to populate the classId
+      });
+        if (students.length === 0) {
+          return res.status(404).send({ status: false, message: "No data found." });
+        }
+        return res.status(200).send({ status: true, data: students });
     } else {
       if(['id', 'name', 'email', 'classId', 'age', 'dob'].includes(...Object.keys(req.query))){
+         
       const { id, name, email, age, dob, classId } = req.query;
       const searchConditions = { isDeleted: false };
 
@@ -48,7 +51,7 @@ const getStudents = async (req, res) => {
       }
 
       if (age) {
-        if(isNaN(classId)){
+        if(isNaN(age)){
           return res.status(400).send({ status:false, message: "age is not valid."});
         }   // validate the age if provided
         searchConditions.age = age;
@@ -58,7 +61,8 @@ const getStudents = async (req, res) => {
         searchConditions.dob = dob;
       }
 
-      const students = await Student.findAll({ where: searchConditions });
+      const students = await db.Students.findAll({ where: searchConditions ,
+        include: [{ model: db.Classes, as: 'class' }]});
 
       if (students.length === 0) {
         return res.status(404).send({status:false, message: "No matching data found." });
@@ -81,7 +85,8 @@ const getStudents = async (req, res) => {
 const getStudentById = async(req, res) => {
   try {
 
-    const oneStudent = await Student.findOne({where:{id:req.params.id, isDeleted:false}});
+    const oneStudent = await db.Students.findOne({where:{id:req.params.id, isDeleted:false},
+      include: [{ model: db.Classes, as: 'class' }]});
     
     if(!oneStudent){
       return res.status(404).send({status:false, message: "No student found with this id " });
@@ -97,9 +102,8 @@ const getStudentById = async(req, res) => {
 // ------------------------------------------------------------- Inserting a student data ---------------------------------------------
 const addStudent = async (req, res) => {
   try {
-    
     let { name, email, age, dob, classId } = req.body;
-    const classInstance = await Class.findByPk(classId);
+    const classInstance = await db.Classes.findByPk(classId);
     name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/ /g, "");
     if (!classInstance) {
       return res.status(404).send({status:false, message: "Class not found" });
@@ -112,20 +116,12 @@ const addStudent = async (req, res) => {
     if(classId && !validateClassId(classId)){
       return res.status(400).send({status:false, message: "Invalid class id" });
     }
-    const newStudent = await Student.create({
+    const newStudent = await db.Students.create({
       name,
       email,
       classId,
       age,
       dob
-    });
-
-    const updatedStudentList = [...classInstance.studentList, newStudent];
-    const updatedTotalStudents = classInstance.totalStudents + 1;
-
-    await classInstance.update({
-      studentList: updatedStudentList,
-      totalStudents: updatedTotalStudents,
     });
 
     return res.status(201).send({status:true, message: "Student added successfully" });
@@ -148,19 +144,10 @@ const updateStudent = async (req, res) => {
       return res.status(400).send({status:false, message: "Invalid age" });
     }
      let updatedAt = Date.now();
-     await Student.update(
+     await db.Students.update(
       { name, age, dob,updatedAt},
       { where: { id: req.params.id , isDeleted:false} }
     );
-    
-    const student = await Student.findByPk(req.params.id);
-    const classInstance = await Class.findByPk(student.classId);
-    const updatedStudentList = classInstance.studentList.map((s) =>
-      s.id === student.id ? student : s
-    );
-
-    await classInstance.update({studentList: updatedStudentList });
-
 
     return res.status(200).send({status:true, message: "Student updated successfully"});
   } catch (err) {
@@ -174,25 +161,13 @@ const updateStudent = async (req, res) => {
 const deleteStudent = async (req, res) => {
   try {
   
-    await Student.update(
+    await db.Students.update(
       { isDeleted: true, deletedAt: Date.now() },
       { where: { id: req.params.id } }
     );
 
     // await Student.destroy({ where:{id: req.params.id}}
-    const student = await Student.findByPk(req.params.id);
-    
-
-    const classInstance = await Class.findByPk(student.classId);
-    const updatedStudentList = classInstance.studentList.map((s) =>
-      s.id === student.id ? `student deleted with id ${req.params.id}` : s
-    );
-    const updatedTotalStudents = classInstance.totalStudents-1;
-
-    await classInstance.update({
-      studentList: updatedStudentList,
-      totalStudents: updatedTotalStudents,
-    });
+    const student = await db.Students.findByPk(req.params.id);
 
     return res.status(200).send({status:true, message: "Student deleted successfully" });
   } catch (err) {
@@ -204,14 +179,14 @@ const deleteStudent = async (req, res) => {
 // ------------------------------------------------------------- Fetching the list of all Students --------------------------
 const fetchStudentList = async (req, res) => {
   try {
-    const students = await Student.findAll({
+    const students = await db.Students.findAll({
       where: {
         isDeleted: false
       },
       attributes: ['name'], // Specify the 'name' attribute only
     });
 
-    const studentCount = await Student.count({
+    const studentCount = await db.Students.count({
       where: {
         isDeleted: false
       }
