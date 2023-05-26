@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const studentController = require('../controller/studentcontroller.js');
 const classController = require('../controller/classcontroller.js');
+const fetchPincode = require('../controller/externalApi.js')
 const {checkIfStudentAlreadyExists, studentNotFound} = require('../middleware/studentvalidation.js');
 const {authentication, authorization} = require('../middleware/auth.js')
 const {studentLogin} = require('../controller/signincontroller.js')
@@ -19,6 +20,8 @@ router.get('/getStudentList', studentController.fetchStudentList);
 router.get('/getClasses', classController.getClassDetails);
 
 router.get('/getClass/:id', paramsValidation,  classController.getClass);
+
+router.get('/fetchPincode/:pincode' , fetchPincode.fetchPincode);
 
 // post requests --------------------------------------------------------------------------------------------------------------------
 router.post('/addStudent', studentvalidation, checkIfStudentAlreadyExists,   studentController.addStudent);

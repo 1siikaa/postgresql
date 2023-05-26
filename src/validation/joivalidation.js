@@ -15,6 +15,7 @@ module.exports = {
       .messages({ "any only": "please provide valid email." })
       .regex(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
      ,
+    Pincode: joi.string().required(),
     dob: joi
       .string()
       .required()

@@ -1,5 +1,5 @@
 // ------------------------------------------------------------- Imports ----------------------------------------------
-
+const axios = require('axios');
 const db = require('../../models/index')
 const {validateAge, validateClassId, validateEmail} = require('../validation/validatingStudent')
 
@@ -105,32 +105,49 @@ const addStudent = async (req, res) => {
     let { name, email, age, dob, classId } = req.body;
     const classInstance = await db.Classes.findByPk(classId);
     name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/ /g, "");
+
     if (!classInstance) {
-      return res.status(404).send({status:false, message: "Class not found" });
+      return res.status(404).send({ status: false, message: "Class not found" });
     }
 
-    if(age && !validateAge(age)){
-      return res.status(400).send({status: false, message: "Invalid age" });
+    if (age && !validateAge(age)) {
+      return res.status(400).send({ status: false, message: "Invalid age" });
     }
 
-    if(classId && !validateClassId(classId)){
-      return res.status(400).send({status:false, message: "Invalid class id" });
+    if (classId && !validateClassId(classId)) {
+      return res.status(400).send({ status: false, message: "Invalid class id" });
+    }
+
+    const pincode = req.body.Pincode;
+    const options = {
+      method: "get",
+      url: `https://api.postalpincode.in/pincode/${pincode}`
+    };
+
+    let result = await axios(options);
+    let details = result.data[0].PostOffice;
+    if(!details){
+    details= null;
+    }
+    else{
+      details= details[0]
     }
     const newStudent = await db.Students.create({
       name,
       email,
       classId,
       age,
-      dob
+      dob,
+      Pincode: pincode,
+      PostOffice: details
     });
 
-    return res.status(201).send({status:true, message: "Student added successfully" });
+    return res.status(201).send({ status: true, message: "Student added successfully" });
   } catch (err) {
     console.error(err);
-    return res.status(500).send({status:false, message: err.message });
+    return res.status(500).send({ status: false, message: err.message });
   }
 };
-
 
 // ------------------------------------------------------------- Updating a Student data ------------------------------------
 const updateStudent = async (req, res) => {

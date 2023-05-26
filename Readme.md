@@ -9,6 +9,17 @@ npx sequelize-cli db:migrate:undo:all
 npx sequelize-cli db:migrate:undo:all --to XXXXXXXXXXXXXX-create-filename.js
 * npx sequelize-cli db:migrate:undo: --name XXXXXXXXXXXXXX-create-filename.js
 npx sequelize-cli db:migrate:status    // for checking up down status //
+ALTER SEQUENCE "Students_id_seq" RESTART WITH 1;
+TRUNCATE TABLE your_table_name;
+TRUNCATE TABLE Classes CASCADE;
+
+
+
+
+
+
+
+
 'use strict';
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {

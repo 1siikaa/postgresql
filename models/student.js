@@ -14,7 +14,9 @@
   dob: DataTypes.DATE,
   isDeleted:{
   type:DataTypes.BOOLEAN
-  }
+  },
+  Pincode: DataTypes.STRING,
+  PostOffice: DataTypes.JSON,
 } ,{paranoid:true,
   timestamps:true})
   Student.associate = (models) => {
