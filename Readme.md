@@ -12,6 +12,7 @@ npx sequelize-cli db:migrate:status    // for checking up down status //
 ALTER SEQUENCE "Students_id_seq" RESTART WITH 1;
 TRUNCATE TABLE your_table_name;
 TRUNCATE TABLE Classes CASCADE;
+TRUNCATE TABLE "Students", "Classes";
 
 
 
