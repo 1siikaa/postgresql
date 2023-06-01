@@ -2,7 +2,9 @@ require('dotenv').config();
 const express = require("express");
 const app = express();
 const route = require('./src/route/route.js');
+const multer= require("multer");
 
+app.use( multer().any())
 // content-type : application/json
 app.use(express.json());
 

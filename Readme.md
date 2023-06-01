@@ -13,7 +13,8 @@ ALTER SEQUENCE "Students_id_seq" RESTART WITH 1;
 TRUNCATE TABLE your_table_name;
 TRUNCATE TABLE Classes CASCADE;
 TRUNCATE TABLE "Students", "Classes";
-
+Access Key : AKIAVB6DAJPO65YQGGWU
+Secret Access Key : nvnedMR8zryqEzAi8pmxhORqulXqOcJcQVkx7A6R
 
 
 

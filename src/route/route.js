@@ -8,6 +8,10 @@ const {checkIfStudentAlreadyExists, studentNotFound} = require('../middleware/st
 const {authentication, authorization} = require('../middleware/auth.js')
 const {studentLogin} = require('../controller/signincontroller.js')
 const {studentvalidation, updatevalidation, paramsValidation, loginValidation} = require('../middleware/joiValidationMiddleware.js')
+const {messageEncryDecry} = require('../controller/crypto-js.js')
+const {uploadingFiles} = require('../controller/aws.-s3.js')
+const {usingBcrypt} = require('../controller/bcrypt.js');
+const { lambdaFunction } = require('../controller/aws-lamda.js');
 // ------------------------------------------------------------------- routing starts -------------------------------------------
 
 // get requests ---------------------------------------------------------------------------------------------------------------------
@@ -23,12 +27,20 @@ router.get('/getClass/:id', paramsValidation,  classController.getClass);
 
 router.get('/fetchPincode/:pincode' , fetchPincode.fetchPincode);
 
+router.get('/encdec', messageEncryDecry);
+
+router.get('/password', usingBcrypt);
+
+router.get('/uselambda', lambdaFunction)
+
 // post requests --------------------------------------------------------------------------------------------------------------------
 router.post('/addStudent', studentvalidation, checkIfStudentAlreadyExists,   studentController.addStudent);
 
 router.post('/login', loginValidation, studentLogin)
 
 router.post('/addClass', classController.addClass);
+
+router.post("/write-file-aws", uploadingFiles)
 
 // put requests ------------------------------------------------------------------------------------------------
 router.put('/udateStudent/:id',  paramsValidation, updatevalidation, authentication, studentNotFound, studentController.updateStudent);
