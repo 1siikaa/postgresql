@@ -1,5 +1,12 @@
 'use strict';
 
+//  This file is responsible for initializing Sequelize, loading models, and exporting the database object for use in
+// other parts of this application.
+
+// basename : basename is the name of the current file.
+// env : env is the current environment (development, production, etc.)
+// config : config is the configuration object for the current environment
+
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
@@ -11,9 +18,9 @@ const db = {};
 
 let sequelize;
 if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+  sequelize = new Sequelize(process.env[config.use_env_variable], { ...config, logging: false });
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelize = new Sequelize(config.database, config.username, config.password, { ...config, logging: false });
 }
 
 fs
@@ -38,6 +45,5 @@ Object.keys(db).forEach(modelName => {
 });
 
 db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-
+// console.log(db)
 module.exports = db;

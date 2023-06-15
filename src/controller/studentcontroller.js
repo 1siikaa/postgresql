@@ -1,9 +1,8 @@
 // ------------------------------------------------------------- Imports ----------------------------------------------
 const axios = require('axios');
 const db = require('../../models/index')
-const {validateAge, validateClassId, validateEmail} = require('../validation/validatingStudent')
-
-
+const {isValidAge, isValidClassId, isValidEmail} = require('../validation/validatingStudent');
+const {Op} = require('sequelize')
 
 // ------------------------------------------------------------- Fetching all students data ---------------------------------------------
 
@@ -11,18 +10,17 @@ const getStudents = async (req, res) => {
   try {
       if (!Object.keys(req.query).length) {
         const students = await db.Students.findAll({
-          where: { isDeleted: false },
           include: [{ model: db.Classes, as: 'class' }] // Include the 'Classes' model to populate the classId
       });
         if (students.length === 0) {
           return res.status(404).send({ status: false, message: "No data found." });
         }
-        return res.status(200).send({ status: true, data: students });
+        return res.status(200).send({ status: true, data: students});
     } else {
       if(['id', 'name', 'email', 'classId', 'age', 'dob'].includes(...Object.keys(req.query))){
          
       const { id, name, email, age, dob, classId } = req.query;
-      const searchConditions = { isDeleted: false };
+      const searchConditions = { };
 
       if (id) {
         // validate the student ID if provided
@@ -33,7 +31,7 @@ const getStudents = async (req, res) => {
       }
 
       if(email){
-        if(!validateEmail){
+        if(!isValidEmail){
           return res.status(400).send({ status:false, message: "email is not valid."});
         }
         searchConditions.email=  { [Op.iLike]: `%${email}%` };
@@ -68,20 +66,18 @@ const getStudents = async (req, res) => {
         return res.status(404).send({status:false, message: "No matching data found." });
       }
 
-      return res.status(200).send({status:true, message:` ${students.length} matching results found`, data :students});
+      return res.status(200).send({status:true, message:` ${students.length} matching responses found`, data :students});
     }
     else{
       return res.status(400).send({status:false, message: "query name can contain id, name, age, dob, email, classId parameter "})
     }
     }
   } catch (err) {
-    return res.status(500).send({status:false, message: err.message });
+    return res.status(400).send({status:false, message: 'unknown error occured', error : err.message });
   }
 };
 
 // ------------------------------------------------------------- Fetching a student data ---------------------------------------------
-
-
 const getStudentById = async(req, res) => {
   try {
 
@@ -94,60 +90,47 @@ const getStudentById = async(req, res) => {
     return res.status(200).send({status:true, data:oneStudent});
   
   } catch (err) {
-    return res.status(500).send({status:false, message: err.message });
+    return res.status(400).send({status:false, message: 'unknown error occured' });
   }
-  
+
 };
 
 // ------------------------------------------------------------- Inserting a student data ---------------------------------------------
 const addStudent = async (req, res) => {
   try {
     let { name, email, age, dob, classId } = req.body;
-    const classInstance = await db.Classes.findByPk(classId);
+    const classInstance = await db.Classes.findByPk(classId, { logging: false });
     name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/ /g, "");
 
-    if (!classInstance) {
-      return res.status(404).send({ status: false, message: "Class not found" });
-    }
-
-    if (age && !validateAge(age)) {
-      return res.status(400).send({ status: false, message: "Invalid age" });
-    }
-
-    if (classId && !validateClassId(classId)) {
-      return res.status(400).send({ status: false, message: "Invalid class id" });
-    }
-
-    const pincode = req.body.Pincode;
-    const options = {
-      method: "get",
-      url: `https://api.postalpincode.in/pincode/${pincode}`
-    };
-
-    let result = await axios(options);
-    let details = result.data[0].PostOffice;
-    if(!details){
-    details= null;
-    }
-    else{
-      details= details[0]
-    }
-    const newStudent = await db.Students.create({
-      name,
-      email,
-      classId,
-      age,
-      dob,
-      Pincode: pincode,
-      PostOffice: details
-    });
-
-    return res.status(201).send({ status: true, message: "Student added successfully" });
+    return (
+      classInstance
+        ? axios
+            .get(`https://api.postalpincode.in/pincode/${req.body.Pincode}`)
+            .then ((response)=> {
+              console.log(response.data[0])
+              
+              const details = response.data && response.data.length && response.data[0]? response.data[0] : null;
+              console.log(details)
+              return db.Students.create({
+                name,
+                email,
+                classId,
+                age,
+                dob,
+                Pincode: req.body.Pincode,
+                PostOffice: details,
+              });
+            })
+            .then(() => res.status(201).send({ status: true, message: "Student added successfully" }))
+            .catch((error) => res.status(400).send({ status: false, message: error.message }))
+        : res.status(400).send({ status: false, message: "Invalid input data" })
+    );
   } catch (err) {
     console.error(err);
-    return res.status(500).send({ status: false, message: err.message });
+    return res.status(400).send({ status: false, message: 'unknown error occurred' });
   }
 };
+
 
 // ------------------------------------------------------------- Updating a Student data ------------------------------------
 const updateStudent = async (req, res) => {
@@ -157,13 +140,13 @@ const updateStudent = async (req, res) => {
     }
     let { name, age, dob} = req.body;
     name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/ /g, "");
+
     if(age && !validateAge(age)){
       return res.status(400).send({status:false, message: "Invalid age" });
     }
-     let updatedAt = Date.now();
      await db.Students.update(
-      { name, age, dob,updatedAt},
-      { where: { id: req.params.id , isDeleted:false} }
+      { name, age, dob},
+      { where: { id: req.params.id , isDeleted:false} }  // isdeleted // updatedAt 
     );
 
     return res.status(200).send({status:true, message: "Student updated successfully"});
@@ -172,23 +155,16 @@ const updateStudent = async (req, res) => {
   }
 };
 
-
-
 // ------------------------------------------------------------- Deleting a student data ------------------------------------
 const deleteStudent = async (req, res) => {
   try {
-  
-    await db.Students.update(
-      { isDeleted: true, deletedAt: Date.now() },
+ return await db.Students.destroy(
       { where: { id: req.params.id } }
-    );
-
-    // await Student.destroy({ where:{id: req.params.id}}
-    const student = await db.Students.findByPk(req.params.id);
-
-    return res.status(200).send({status:true, message: "Student deleted successfully" });
+    ) ? 
+    res.status(200).send({status:true, message: "Student deleted successfully" }) :
+    res.status(400).send({status: false, message:'unknown error occured'});
   } catch (err) {
-    return res.status(500).send({status:false,  message: err.message });
+    return res.status(400).send({status:false,  message: 'unknown error occured' });
   }
 };
 
@@ -197,26 +173,12 @@ const deleteStudent = async (req, res) => {
 const fetchStudentList = async (req, res) => {
   try {
     const students = await db.Students.findAll({
-      where: {
-        isDeleted: false
-      },
-      attributes: ['name'], // Specify the 'name' attribute only
+      attributes: ['name'],                              // Specify the 'name' attribute only
     });
-
-    const studentCount = await db.Students.count({
-      where: {
-        isDeleted: false
-      }
-    }); // Count the number of students with isDeleted as false
-
-    if (students.length === 0) {
-      return res.status(404).send({ status:false, message: "No students found" });
-    }
-
-    const studentNames = students.map((student) => student.name);
-    return res.status(200).json({status:true, count: studentCount, data: studentNames });
+    const studentCount = await db.Students.count(); // Count the number of students with isDeleted as false
+    return studentCount ? res.status(200).json({status:true, count: studentCount, data: students }): res.status(404).send({status:false, message: "no student found"})
   } catch (err) {
-    return res.status(500).send({status:false, message: err.message });
+    return res.status(400).send({status:false, message: 'unknown error occured' });
   }
 };
 

@@ -5,7 +5,7 @@ const db = require('../../models/index')
 const checkIfStudentAlreadyExists = async(req, res, next)=>{
     try{
     const {email} = req.body
-    const student = await db.Students.findOne({ where: { email: email} });
+    const student = await db.Students.findOne({ where: { email: email} }, {logging: false});
     if (student !== null) {
       return res.status(409).send({status:false, message: "Student already exist" });
     }
@@ -26,7 +26,7 @@ const studentNotFound = async (req, res, next) => {
           id: id,
           isDeleted: false
         }
-      });
+      }, {loggedIn: false});
       if (!student) {
         return res.status(404).send({status:false, message: "No student found with this id." });
       }

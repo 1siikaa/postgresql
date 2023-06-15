@@ -26,5 +26,29 @@ module.exports = {
     if (error) {
       return res.status(400).send({ status: false, message: error.message });
     } else next();
+  },
+  markValidation : (req, res, next) => {
+    const { error } = validation.markValidation.validate(req.body);
+    if (error) {
+      return res.status(400).send({ status: false, message: error.message });
+    } else next();   
+  },
+  subjectValidation : (req, res, next) => {
+    const { error } = validation.subjectValidation.validate(req.body);
+    if (error) {
+      return res.status(400).send({ status: false, message: error.message });
+    } else next();
+  },
+  markUpdateValidation : (req, res, next) => { 
+    const { error } = validation.markUpdateValidation.validate(req.body);
+    if (error) {
+      return res.status(400).send({ status: false, message: error.message });
+    } else next();
+  },
+  subjectUpdateValidation : (req, res, next)=> {
+    const { error } = validation.subjectUpdateValidation.validate(req.body);
+    if (error) {
+      return res.status(400).send({ status: false, message: error.message });
+    } else next();
   }
 };

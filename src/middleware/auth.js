@@ -13,7 +13,7 @@ const authentication = function (req, res, next) {
             jwt.verify(req.headers["authorization"], process.env.PRIVATE_KEY , function (err, decodedToken) {
             if(err){return res.status(401).send({ status: false, message: "forbidden" })}
             else{
-           if(req.params.id === decodedToken.id ){
+           if(Number(req.params.id) === decodedToken.id ){
             next()
            }
            else{

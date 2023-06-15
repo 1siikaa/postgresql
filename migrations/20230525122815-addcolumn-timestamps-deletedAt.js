@@ -9,11 +9,8 @@ module.exports = {
       type: Sequelize.DATE,
       defaultValue: null
     })
-
-
   },
 
   down: async (queryInterface, Sequelize) => {
-    
   },
 };

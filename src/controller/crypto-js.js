@@ -1,6 +1,4 @@
-const CryptoJS = require('crypto-js');
-
-
+const CryptoJS = require('crypto-js');   // two way process 
 const messageEncryDecry = async(req, res)=> {
     try{
 const message = req.body.message;
@@ -15,9 +13,10 @@ obj.encryptedMessage = encryptedMessage;
 
 // Decrypt
 const bytes = CryptoJS.AES.decrypt(encryptedMessage, secretKey);
-console.log(bytes);
+
 const decryptedMessage = bytes.toString(CryptoJS.enc.Utf8);
 obj.decryptedMessage = decryptedMessage;
+
 return res.status(200).send({status:true, data:obj})
     }
     catch(err){

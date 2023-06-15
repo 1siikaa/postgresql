@@ -1,9 +1,9 @@
 const AWS = require('aws-sdk');
-const accessKeyId = "AKIAVB6DAJPO65YQGGWU";
-const secretAccessKey =  "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";
+const accessKeyId = "access_key_id";
+const secretAccessKey =  "secret_access_key";
 
 AWS.config.update({
-  region: 'us-east-2',
+  region: 'region',
   credentials: {
   accessKeyId: accessKeyId,
   secretAccessKey: secretAccessKey
@@ -12,15 +12,15 @@ AWS.config.update({
 const lambda = new AWS.Lambda();
 
 const params = {
-  FunctionName: 'secondLamda',
-  Payload: JSON.stringify({ key: 'value' }) // Optional payload
+  FunctionName: 'myfunctionname',
+ Payload: JSON.stringify({ key: 'value' }) // Optional payload
 };
 
 const lambdaFunction = async(req, res)=>{
 lambda.invoke(params, function(err, data) {
   if (err) {
     console.log('Error:', err);
-    return res.status(400).send({status:false, message: "error"})
+    return res.status(400).send({status:false, message: err.name})
   } else {
     return res.status(200).send({status:true, data: JSON.parse(data.Payload)})
   }

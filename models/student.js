@@ -12,16 +12,16 @@
   }},
   age: DataTypes.INTEGER,
   dob: DataTypes.DATE,
-  isDeleted:{
-  type:DataTypes.BOOLEAN
-  },
   Pincode: DataTypes.STRING,
   PostOffice: DataTypes.JSON,
+  createdAt : DataTypes.DATE,
 } ,{paranoid:true,
   timestamps:true})
   Student.associate = (models) => {
     Student.belongsTo(models.Classes, { foreignKey: 'classId', as: 'class' });
+    Student.hasMany(models.Marks, { foreignKey: 'studentId', as: 'marks' });
   };
+
   return Student
   }
 // `sequelize.define` also returns the model
