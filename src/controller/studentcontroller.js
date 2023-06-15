@@ -1,7 +1,7 @@
 // ------------------------------------------------------------- Imports ----------------------------------------------
 const axios = require('axios');
 const db = require('../../models/index')
-const {isValidAge, isValidClassId, isValidEmail} = require('../validation/validatingStudent');
+const {isValidEmail} = require('../validation/validatingStudent');
 const {Op} = require('sequelize')
 
 // ------------------------------------------------------------- Fetching all students data ---------------------------------------------
@@ -73,7 +73,7 @@ const getStudents = async (req, res) => {
     }
     }
   } catch (err) {
-    return res.status(400).send({status:false, message: 'unknown error occured', error : err.message });
+    return res.status(400).send({status:false, message: 'unknown error occured' });
   }
 };
 
@@ -81,7 +81,7 @@ const getStudents = async (req, res) => {
 const getStudentById = async(req, res) => {
   try {
 
-    const oneStudent = await db.Students.findOne({where:{id:req.params.id, isDeleted:false},
+    const oneStudent = await db.Students.findOne({where:{id:req.params.id},
       include: [{ model: db.Classes, as: 'class' }]});
     
     if(!oneStudent){
@@ -99,7 +99,7 @@ const getStudentById = async(req, res) => {
 const addStudent = async (req, res) => {
   try {
     let { name, email, age, dob, classId } = req.body;
-    const classInstance = await db.Classes.findByPk(classId, { logging: false });
+    const classInstance = await db.Classes.findByPk(classId);
     name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/ /g, "");
 
     return (
@@ -122,11 +122,10 @@ const addStudent = async (req, res) => {
               });
             })
             .then(() => res.status(201).send({ status: true, message: "Student added successfully" }))
-            .catch((error) => res.status(400).send({ status: false, message: error.message }))
+            .catch((error) => res.status(400).send({ status: false, message: 'try again later' }))
         : res.status(400).send({ status: false, message: "Invalid input data" })
     );
   } catch (err) {
-    console.error(err);
     return res.status(400).send({ status: false, message: 'unknown error occurred' });
   }
 };
@@ -141,17 +140,14 @@ const updateStudent = async (req, res) => {
     let { name, age, dob} = req.body;
     name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/ /g, "");
 
-    if(age && !validateAge(age)){
-      return res.status(400).send({status:false, message: "Invalid age" });
-    }
      await db.Students.update(
       { name, age, dob},
-      { where: { id: req.params.id , isDeleted:false} }  // isdeleted // updatedAt 
+      { where: { id: req.params.id } }  
     );
 
     return res.status(200).send({status:true, message: "Student updated successfully"});
   } catch (err) {
-    return res.status(500).send({status:false, message: err.message });
+    return res.status(400).send({status:false, message: "unknown error occured" });
   }
 };
 
@@ -162,7 +158,7 @@ const deleteStudent = async (req, res) => {
       { where: { id: req.params.id } }
     ) ? 
     res.status(200).send({status:true, message: "Student deleted successfully" }) :
-    res.status(400).send({status: false, message:'unknown error occured'});
+    res.status(404).send({status: false, message:'not found'});
   } catch (err) {
     return res.status(400).send({status:false,  message: 'unknown error occured' });
   }

@@ -7,7 +7,7 @@ const fetchPincode = require('../controller/externalApi.js')
 const {checkIfStudentAlreadyExists, studentNotFound} = require('../middleware/studentValidation.js');
 const {authentication} = require('../middleware/auth.js')
 const {studentLogin} = require('../controller/signincontroller.js')
-const {studentvalidation, updatevalidation, paramsValidation, loginValidation, markValidation, subjectValidation, markUpdateValidation, subjectUpdateValidation} = require('../middleware/joiValidationMiddleware.js')
+const {studentvalidation, updatevalidation, paramsValidation, loginValidation, markValidation, subjectValidation, markUpdateValidation, subjectUpdateValidation, classValidation} = require('../middleware/joiValidationMiddleware.js')
 const {messageEncryDecry} = require('../controller/crypto-js.js')
 const {uploadingFiles} = require('../controller/aws.-s3.js')
 const {usingBcrypt} = require('../controller/bcrypt.js');
@@ -57,7 +57,7 @@ router.post('/addStudent', studentvalidation, checkIfStudentAlreadyExists,   stu
 
 router.post('/login', loginValidation, studentLogin)
 
-router.post('/addClass', classController.addClass);
+router.post('/addClass', classValidation, classController.addClass);
 
 router.post("/write-file-aws", uploadingFiles)
 
@@ -78,6 +78,8 @@ router.delete('/deleteStudent/:id',  paramsValidation,  authentication,  student
 router.delete('/deleteSubject/:id', paramsValidation, deleteSubject)
 
 router.delete('/deleteMarks/:id', paramsValidation, deleteMarks)
+
+router.delete('/deleteAClass/:id', paramsValidation, classController.deleteAClass)
 // -------------------------------------------------------------------- route not found --------------------------------------------------------------
 
 router.all('/*', (req, res) => {

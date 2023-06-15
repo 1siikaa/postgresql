@@ -12,42 +12,42 @@ const addMarks = async (req, res) => {
         replacements: { marks, subjectId, studentId, classId },
         plain: false,
     });
-    return res.status(201).send({status:true, message: "added successfully."})
+    return results.length ? res.status(201).send({status:true, message: "added successfully."}): res.status(400).send({status:false, message:'failed to insert'})
     }
   catch (err) {
-    return res.status(400).send({status: false,message: "unknown error occured", error: err.message });
+    return res.status(400).send({status: false,message: "unknown error occured"});
   }
 };
 
 // fetching students marks
 const getMarks = async (req, res) => {
   try {
-    let query = `SELECT "Marks".marks, "Marks"."studentId",  "Students".name, "Subjects"."subjectName", "Marks"."subjectId",
-        "Subjects"."classId" FROM "Marks"
-        INNER JOIN "Students" ON "Marks"."studentId" = "Students".id
-        INNER JOIN "Subjects" ON "Marks"."subjectId" = "Subjects".id
-        WHERE "Marks"."deletedAt" IS null`;
+    let query = `SELECT "m".marks, "m"."studentId",  "st".name, "sub"."subjectName", "m"."subjectId",
+        "sub"."classId" FROM "Marks" m
+        INNER JOIN "Students" st ON "m"."studentId" = "st".id
+        INNER JOIN "Subjects" sub ON "m"."subjectId" = "sub".id
+        WHERE "m"."deletedAt" IS null`;
 
     const { studentId, subjectId, name, subjectName, marks } = req.query;
 
     if (studentId) {
-      query += ` AND "Students".id = :studentId`;
+      query += ` AND "st".id = :studentId`;
     }
 
     if (subjectId) {
-      query += ` AND "Subjects".id = :subjectId`;
+      query += ` AND "sub".id = :subjectId`;
     }
 
     if (name) {
-      query += ` AND "Students".name ILIKE :name`;
+      query += ` AND "st".name ILIKE :name`;
     }
 
     if(subjectName){
-      query += ` AND "Subjects"."subjectName" ILIKE :subjectName`;
+      query += ` AND "sub"."subjectName" ILIKE :subjectName`;
     }
 
     if(marks){
-      query += ` AND "Marks".marks = :marks`;
+      query += ` AND "m".marks = :marks`;
     }
   
     const results = await db.sequelize.query(query, {
@@ -56,9 +56,9 @@ const getMarks = async (req, res) => {
       replacements: { studentId, subjectId, name: `%${name}%`, subjectName: `%${subjectName}%`, marks }
     });
 
-    return results ? res.status(200).send({ status: true, data: results }) : res.status(404).send({ status: false, message: "Couldn't find" });
+    return results.length ? res.status(200).send({ status: true, data: results }) : res.status(404).send({ status: false, message: "Couldn't find" });
   } catch (err) {
-    return res.status(400).send({ status: false, message: "Unknown error occurred", error: err.message });
+    return res.status(400).send({ status: false, message: "Unknown error occurred" });
   }
 };
 
@@ -66,26 +66,26 @@ const getMarks = async (req, res) => {
 // fetching totalMarks 
 const getTotalMarks = async (req, res) => {
   try {
-    {   let query = `SELECT SUM("Marks".marks) as totalmarks, "Students".name
-            FROM "Marks"
-            INNER JOIN "Students" ON "Marks"."studentId" = "Students".id
-            WHERE "Marks"."deletedAt" IS null
-            GROUP BY "Students".id
+    {   let query = `SELECT SUM("m".marks) as totalmarks, "st".name
+            FROM "Marks" m
+            INNER JOIN "Students" st ON "m"."studentId" = "st".id
+            WHERE "m"."deletedAt" IS null
+            GROUP BY "st".id
             `;
 
             const { studentId,  name, classId } = req.query;
 
             if (studentId) {
-              query += ` AND "Students".id = :studentId`;
+              query += ` AND "st".id = :studentId`;
             }
         
         
             if (name) {
-              query += ` AND "Students".name ILIKE :name`;
+              query += ` AND "st".name ILIKE :name`;
             }
         
             if(classId){
-              query += ` AND "Subjects"."classId" = :classId`;
+              query += ` AND "m"."classId" = :classId`;
             }
 
       const results = await db.sequelize.query(query, {
@@ -94,10 +94,10 @@ const getTotalMarks = async (req, res) => {
       plain: false,
       });
       
-      return results ?  res.status(200).send({ status: true, data: results }) : res.status(404).send({status:false, message:"Couldn't find"})
+      return results.length ?  res.status(200).send({ status: true, data: results }) : res.status(404).send({status:false, message:"Couldn't find"})
     }
   } catch (err) {
-    return res.status(400).send({status: false,message: "Unknown error occurred", error : err.message});
+    return res.status(400).send({status: false,message: "Unknown error occurred"});
   }
 };
 
@@ -105,29 +105,29 @@ const getTotalMarks = async (req, res) => {
 // getting total Percentage
 const getTotalParcentage = async (req, res) => {
   try {
-let query = `SELECT CONCAT(ROUND((SUM("Marks".marks)*100)/SUM("Subjects"."totalMarks"), 2), ' %') as totalPercentage, "Students".name,
+let query = `SELECT CONCAT(ROUND((SUM("m".marks)*100)/SUM("sub"."totalMarks"), 2), ' %') as totalPercentage, "st".name,
 CASE
-WHEN ROUND((SUM("Marks".marks)*100)/SUM("Subjects"."totalMarks"), 2) >= 35 THEN 'Pass'
+WHEN ROUND((SUM("m".marks)*100)/SUM("sub"."totalMarks"), 2) >= 35 THEN 'Pass'
 ELSE 'Fail'
 END AS result
-FROM "Marks" 
-INNER JOIN "Students"  ON "Marks"."studentId" = "Students".id 
-INNER JOIN "Subjects"  ON "Marks"."subjectId" = "Subjects".id
-WHERE "Marks"."deletedAt" IS null
-GROUP BY "Students".id`;
+FROM "Marks" m
+INNER JOIN "Students" st  ON "m"."studentId" = "st".id 
+INNER JOIN "Subjects" sub ON "m"."subjectId" = "sub".id
+WHERE "m"."deletedAt" IS null
+GROUP BY "st".id`;
 const { studentId, name, classId } = req.query;
 
             if (studentId) {
-              query += ` AND "Students".id = :studentId`;
+              query += ` AND "st".id = :studentId`;
             }
         
         
             if (name) {
-              query += ` AND "Students".name ILIKE :name`;
+              query += ` AND "st".name ILIKE :name`;
             }
         
             if(classId){
-              query += ` AND "Subjects"."classId" = :classId`;
+              query += ` AND "sub"."classId" = :classId`;
             }
 
 
@@ -137,43 +137,59 @@ const { studentId, name, classId } = req.query;
       replacements: { studentId, name: `%${name}%`, classId },
     });
 
-    return results ?  res.status(200).send({ status: true, data: results }) : res.status(404).send({status:false, message:"Couldn't find"})
+    return results.length ?  res.status(200).send({ status: true, data: results }) : res.status(404).send({status:false, message:"Couldn't find"})
   } catch (err) {
-    return res.status(400).send({ status: false, message: "Unknown error occurred", error : err.message });
+    return res.status(400).send({ status: false, message: "Unknown error occurred"});
   }
 };
 
 // fetching toppers of the class 
 const getAllToppers = async (req, res) => {
   try {
-let query = `SELECT CONCAT(ROUND((SUM("Marks".marks)*100)/SUM("Subjects"."totalMarks"), 2), ' %') as totalPercentage, "Students".name,
-CASE
-WHEN ROUND((SUM("Marks".marks)*100)/SUM("Subjects"."totalMarks"), 2) >= 35 THEN 'Pass'
-ELSE 'Fail'
-END AS result
-FROM "Marks" 
-INNER JOIN "Students" ON "Marks"."studentId" = "Students".id 
-INNER JOIN "Subjects" ON "Marks"."subjectId" = "Subjects".id
-WHERE "Marks"."deletedAt" IS null
-GROUP BY "Students".id 
-ORDER BY totalPercentage DESC
-LIMIT 1
-`;
-const {classId} = req.query;
-if(classId){
-  query += ` AND "Subjects"."classId" = :classId`;
-}
-const results = await db.sequelize.query(query, {
-  type: QueryTypes.SELECT,
-  replacements : {classId},
-  plain: false,
+    const { classId } = req.query;
+
+    let query= `WITH subquery AS (
+      SELECT CONCAT(ROUND((SUM(m.marks) * 100) / SUM(sub."totalMarks"), 2), ' %') AS HighestPercentage,
+             st.name AS StudentName,
+             cls.id AS ClassId,
+             CASE
+               WHEN ROUND((SUM(m.marks) * 100) / SUM(sub."totalMarks"), 2) >= 35 THEN 'Pass'
+               ELSE 'Fail'
+             END AS Result,
+             RANK() OVER (PARTITION BY cls.id ORDER BY (SUM(m.marks) * 100) / SUM(sub."totalMarks") DESC) AS RankNumber
+      FROM "Marks" m
+        INNER JOIN "Students" st ON m."studentId" = st.id
+        INNER JOIN "Subjects" sub ON m."subjectId" = sub.id
+        INNER JOIN "Classes" cls ON m."classId" = cls.id
+      WHERE m."deletedAt" IS NULL`;
+
+    if (classId) {
+      query += ` AND cls.id = :classId`;
+    }
+
+    query += `
+    GROUP BY cls.id, st.id, st.name
+    )
+    SELECT HighestPercentage, StudentName, ClassId, Result, RankNumber
+    FROM subquery
+    WHERE RankNumber = 1;`;
+
+    const results = await db.sequelize.query(query, {
+      type: QueryTypes.SELECT,
+      replacements: { classId },
+      plain: false,
     });
 
-    return results ?  res.status(200).send({ status: true, data: results }) : res.status(404).send({status:false, message:"Couldn't find"})
+    return results.length
+      ? res.status(200).send({ status: true, data: results })
+      : res.status(404).send({ status: false, message: "Couldn't find" });
   } catch (err) {
-    return res.status(400).send({status: false,message: "Unknown error occurred"});
+    return res
+      .status(400)
+      .send({ status: false, message: "Unknown error occurred"});
   }
 };
+
 
 // fetching average marks 
 const getAverageMarksOfAClass = async (req, res) => {
@@ -181,19 +197,19 @@ const getAverageMarksOfAClass = async (req, res) => {
     const {classId} = req.query
     let query = `
   WITH subquery AS (
-    SELECT SUM("Marks".marks) AS totalMarks, "Classes".id AS classId, COUNT("Marks"."studentId") AS totalStudents
-    FROM "Marks"
-    INNER JOIN "Students" ON "Marks"."studentId" = "Students"."id"
-    INNER JOIN "Classes" ON "Students"."classId" = "Classes"."id"
-    WHERE "Marks"."deletedAt" IS NULL 
-    GROUP BY "Classes".id
+    SELECT SUM("m".marks) AS totalMarks, "cls".id AS classId, COUNT("m"."studentId") AS totalStudents
+    FROM "Marks" m
+    INNER JOIN "Students" st ON "m"."studentId" = "st"."id"
+    INNER JOIN "Classes" cls ON "st"."classId" = "cls"."id"
+    WHERE "m"."deletedAt" IS NULL 
+    GROUP BY "cls".id
   )
   SELECT (subquery.totalMarks / subquery.totalStudents) AS averageScore , subquery.totalMarks AS totalMarks,  subquery.totalStudents AS totalStudents
   FROM subquery
 `;
 
  if(classId){
-  query += ` AND "Subjects"."classId" = :classId`;
+  query += ` AND "m"."classId" = :classId`;
 }
     const results = await db.sequelize.query(query, {
       type: QueryTypes.SELECT,
@@ -201,9 +217,9 @@ const getAverageMarksOfAClass = async (req, res) => {
       replacements : {classId}
     });
    
-    return results ?  res.status(200).send({ status: true, data: results }) : res.status(404).send({status:false, message:"Couldn't find"})
+    return results.length ?  res.status(200).send({ status: true, data: results }) : res.status(404).send({status:false, message:"Couldn't find"})
   } catch (err) {
-    return res.status(400).send({status: false,message: "Unknown error occurred", error:err.message});
+    return res.status(400).send({status: false,message: "Unknown error occurred"});
   }
 };
 
@@ -213,12 +229,12 @@ const deleteMarks = async (req, res) => {
   const query = `UPDATE "Marks" SET "deletedAt" = now() WHERE "deletedAt" IS NULL AND "id" = :id`;
     const results = await db.sequelize.query(query, {
      replacements : {id},
-     type: QueryTypes.DELETE
+     type: QueryTypes.UPDATE
     })
     return results.length ? res.status(200).send({status:true, message: "successfully removed"}) : res.status(400).send({status:false, message: "unable to remove"})   
   }
   catch(err){
-    return res.status(400).send({status: false, message: err.message});
+    return res.status(400).send({status: false});
   }
 }
 

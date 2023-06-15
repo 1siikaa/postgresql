@@ -27,6 +27,12 @@ module.exports = {
       return res.status(400).send({ status: false, message: error.message });
     } else next();
   },
+  classValidation : (req, res, next) => {
+    const { error } = validation.classValidation.validate(req.body);
+    if (error) {
+      return res.status(400).send({ status: false, message: error.message });
+    } else next(); 
+  },
   markValidation : (req, res, next) => {
     const { error } = validation.markValidation.validate(req.body);
     if (error) {

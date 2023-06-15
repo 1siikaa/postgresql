@@ -15,7 +15,7 @@ const checkIfSubjectAlreadyExists = async(req, res, next)=>{
       return subject.length ? res.status(409).send({status:false, message: `Subject already exist for class ${classId}` }) : next()
     }
     catch(err){
-        return res.status(500).send({status:false, message:err.message});
+        return res.status(400).send({status:false, message:"unknown error occured"});
     }
 }
 

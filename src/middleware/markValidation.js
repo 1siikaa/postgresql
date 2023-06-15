@@ -6,7 +6,7 @@ const {QueryTypes} = require('sequelize')
 const checkIfMarkAlreadyExists = async(req, res, next)=>{
     try{
     const {studentId, subjectId, classId} = req.body
-    const query = `SELECT "Marks"."studentId" FROM "Marks" WHERE "Marks"."studentId"= :studentId AND "Marks"."subjectId" = :subjectId AND "Marks"."classId" = :classId AND "Marks"."deletedAt" IS NULL
+    const query = `SELECT "studentId" FROM "Marks" WHERE "studentId"= :studentId AND "subjectId" = :subjectId AND "classId" = :classId AND "deletedAt" IS NULL
     `;
     const Mark = await db.sequelize.query(query, {
         type: QueryTypes.SELECT,
@@ -16,7 +16,7 @@ const checkIfMarkAlreadyExists = async(req, res, next)=>{
       return Mark.length ? res.status(409).send({status:false, message: `Mark already exist for student ${studentId} of class ${classId}` }) : next()
     }
     catch(err){
-        return res.status(500).send({status:false, message:err.message});
+        return res.status(400).send({status:false, message:"unknown error occured"});
     }
 }
 
