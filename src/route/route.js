@@ -16,6 +16,7 @@ const { addSubject, getSubjects, updateMarks, deleteSubject, updateSubject } = r
 const { addMarks, getMarks, getTotalMarks, getTotalParcentage, getAllToppers, getAverageMarksOfAClass, deleteMarks } = require('../controller/markController.js');
 const { checkIfSubjectAlreadyExists } = require('../middleware/subjectValidation.js');
 const { checkIfMarkAlreadyExists } = require('../middleware/markValidation.js');
+const { mailing } = require('../../nodemailer/nodemailer.js');
 
 
 
@@ -64,6 +65,8 @@ router.post("/write-file-aws", uploadingFiles)
 router.post('/addSubject', subjectValidation,  checkIfSubjectAlreadyExists, addSubject)
 
 router.post('/addMark', markValidation, checkIfMarkAlreadyExists, addMarks)
+
+router.post('/mailing', mailing)
 
 // put requests ------------------------------------------------------------------------------------------------
 router.put('/udateStudent/:id',  paramsValidation, updatevalidation, authentication, studentNotFound, studentController.updateStudent);

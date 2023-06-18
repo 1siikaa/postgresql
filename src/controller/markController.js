@@ -81,7 +81,7 @@ const getTotalMarks = async (req, res) => {
         
         
             if (name) {
-              query += ` AND "st".name ILIKE :name`;
+              query += ` AND "st".name ILIKE '%:name%' `;  // syntax
             }
         
             if(classId){

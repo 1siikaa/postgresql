@@ -23,12 +23,42 @@ The CASCADE option ensures that the integrity of the data is maintained by propa
 // belongs to : represents a one-to-one or many-to-one relationship, where a record belongs to a single record in another table. 
 // hasMany : represents a one-to-many relationship, where a record can have multiple related records in another table.
 
-// get one or more topper of a class
-// get topper of class vise
-// apply rank function to get the class toppers
-// removes * field
+
 // read about query performance and writing query in a good manner
 // read more about sql query and event loop
 // max and having statements
+// git branching and ssh keys
+// read more about git and github
+//event loop  promise , external call, event loop stages,  setInterval, clearInterval, macrotask queue and microtask queue , promise-chaining, async await, callback function, callback hell
+
+
+
+## GIT AND GITHUB --------------------------------------------------------------------------------------------
+
+ GIT BASH VERSION CONTROL SYSTEM (Distributed Version Control System)  
+ WHAT IS GIT ---- Git has been designed with performance, security and flexibility in mind.
+ Committing new changes, branching, merging and comparing past versions are all optimized for performance.
+
+ GIT CLONE / GIT INIT ----------- However, git clone is dependent on git init. git clone is used to create a copy of an existing repository. Internally, git clone first calls git init to create a new repository. It then copies the data from the existing repository, and checks out a new set of working files. 
+
+ git init <directory>
+ git init --bare <directory>
+ ssh <user>@<host> cd path/above/repo git init --bare my-project.git
+ git init <directory> --template=<template_directory
+ git clone <repo> <directory>
+ git clone --branch <tag> <repo>
+ Git URL protocols
+-SSH
+Secure Shell (SSH) is a ubiquitous authenticated network protocol that is commonly configured by default on most servers. Because SSH is an authenticated protocol, you'll need to establish credentials with the hosting server before connecting. ssh://[user@]host.xz[:port]/path/to/repo.git/
+
+Use git checkout to move around and review the commit history
+git revert is the best tool for undoing shared public changes
+git reset is best used for undoing local private changes
+
+
+
+
+
+
 
 
