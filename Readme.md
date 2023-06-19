@@ -56,6 +56,16 @@ git revert is the best tool for undoing shared public changes
 git reset is best used for undoing local private changes
 
 
+delimiter or dollar-quoting syntax $$ : a character that marks the beginning or end of a unit of data $$ --------------------   For example, $$test$$, $example$, or $delimiter$ are all valid dollar-quoting delimiters.
+
+:: - This is the type cast operator in PostgreSQL. It allows you to explicitly convert a value to a specific data type. For example, 123::text converts the integer value 123 to the text type.
+
+:= - This is the assignment operator in PostgreSQL. It is used to assign a value to a variable or a column in an UPDATE statement. For example, my_variable := 10 assigns the value 10 to the variable my_variable.
+
+
+
+
+
 
 
 

@@ -22,14 +22,16 @@
 //     q4. diff between stored_procedure and function. When they should be used.
 
 
-const query = `SELECT c.name , COUNT(c.id) FROM customer c
+const query = `SELECT c.name, COUNT(c.id) FROM customer c
 INNER JOIN purchased_items p ON c.id = p.customer_id
 INNER JOIN items i ON p.item_id = i.id
-INNER JOIN supplier s ON i.supplier_id = s.id = supplier.id
-WHERE c.id=p.customer_id AND i.id=p.item_id AND i.name ILIKE "%iphone%" AND s.name ILIKE "%Apple%"`;
+INNER JOIN supplier s ON i.supplier_id = s.id
+WHERE i.name ILIKE '%iphone%' AND s.name ILIKE '%Apple%'
+GROUP BY c.name;
+`;
 
 const query2 = `SELECT i.name FROM items i
-WHERE i.rating > (SELECT AVG(i.rating) FROM items i GROUP BY i.id) AND i.supplier_id = 2`;
+WHERE i.rating > (SELECT AVG(rating) FROM items WHERE supplier_id = 2) AND i.supplier_id = 2`;
 
 // In PostgreSQL, both stored procedures and user-defined functions are created with CREATE FUNCTION statement.
 // 	---------------------------------------------------------------------------------------------------------------------------------  //

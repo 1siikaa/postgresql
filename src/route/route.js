@@ -18,8 +18,6 @@ const { checkIfSubjectAlreadyExists } = require('../middleware/subjectValidation
 const { checkIfMarkAlreadyExists } = require('../middleware/markValidation.js');
 const { mailing } = require('../../nodemailer/nodemailer.js');
 
-
-
 // ------------------------------------------------------------------- routing starts -------------------------------------------
 
 // get requests ---------------------------------------------------------------------------------------------------------------------

@@ -1,36 +1,42 @@
 var nodemailer = require('nodemailer');
 require('dotenv').config()
 
-// Create the transporter with the required configuration for Outlook
-// change the user and pass !
-var transporter = nodemailer.createTransport({
-    host: "smtp-mail.outlook.com", // hostname
-    secureConnection: false, // TLS requires secureConnection to be false
-    port: 587, // port for secure SMTP
-    tls: {
-       ciphers:'SSLv3'
-    },
-    auth: {
-        user: process.env.USERS,
-        pass: process.env.PASS
+
+async function send365Email(password, from, to, subject, html, text) {
+    try { 
+        const transportOptions = {
+            host: 'smtp.office365.com',
+            port: '587',
+            auth: { user: from, pass: password },
+            secureConnection: true,
+            tls: { ciphers: 'SSLv3' }
+        };
+    
+        const mailTransport = nodemailer.createTransport(transportOptions);
+    
+        let result = await mailTransport.sendMail({
+            from,
+            to,
+            replyTo: from,
+            subject,
+            html,
+            text
+        });
+        return result ? true : false;
+    } catch (err) { 
+        console.error(`send365Email: An error occurred:`, err);
     }
-});
+}
+const mailing = async(req, res) => {
+try{
+let response = send365Email(req.body.password, req.body.from, req.body.to, req.body.subject, req.body.html, req.body.text)
+return response ? res.status(200).send({status:true, message: "message sent successfully"}): res.status(400).send({status:false, message: "can't send some error occured"})
+}
+catch(err){
+    return res.status(400).send({status:false, message: "some unknown error occured." })
+}
+}
 
-// setup e-mail data, even with unicode symbols
-var mailOptions = {
-    from: `Importanat Details ${process.env.USERS}`, // sender address (who sends)
-    to: 'vanshikaadubeydigitest@yopmail.com', // list of receivers (who receives)
-    subject: 'Sending it first time', // Subject line
-    text: 'Nodemailer', // plaintext body
-    html: '<b>Hello world </b><br> This is the first email sent with Nodemailer in Node.js' // html body
-};
-console.log(mailOptions)
-
-// send mail with defined transport object
-transporter.sendMail(mailOptions, function(error, info){
-    if(error){
-        return console.log(error);
-    }
-
-    console.log('Message sent: ' + info.response);
-});
+module.exports = {
+    mailing
+}
