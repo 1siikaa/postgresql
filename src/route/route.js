@@ -82,14 +82,11 @@ router.delete('/deleteMarks/:id', paramsValidation, deleteMarks)
 
 router.delete('/deleteAClass/:id', paramsValidation, classController.deleteAClass)
 // -------------------------------------------------------------------- route not found --------------------------------------------------------------
-
 router.all('/*', (req, res) => {
     return res.status(404).json({
         message: 'Page not found'
     });
 });
-
-
 
 // -------------------------------------------------------------------------- exports --------------------------------------------
 module.exports = router;
