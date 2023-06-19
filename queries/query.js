@@ -1,5 +1,5 @@
 // customer {
-//     id, name, }
+//     id, name}
    
 //     supplier {
 //     id, name
