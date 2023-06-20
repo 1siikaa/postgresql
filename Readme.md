@@ -3,7 +3,9 @@
 npm install --save-dev sequelize-cli
 npx sequelize-cli init
 *  --attributes name:string,email:string,age:integer,dob:date
-* npx sequelize-cli db:migrate
+* npx sequelize-cli db:migrate // up 
+* npx sequelize-cli db:migrate:undo // down
+
 npx sequelize-cli model:generate --name Userze-cli db:migrate:undo
 npx sequelize-cli db:migrate:undo:all
 npx sequelize-cli db:migrate:undo:all --to XXXXXXXXXXXXXX-create-filename.js

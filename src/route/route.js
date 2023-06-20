@@ -5,8 +5,8 @@ const studentController = require('../controller/studentcontroller.js');
 const classController = require('../controller/classcontroller.js');
 const fetchPincode = require('../controller/externalApi.js')
 const {checkIfStudentAlreadyExists, studentNotFound} = require('../middleware/studentValidation.js');
-const {authentication} = require('../middleware/auth.js')
-const {studentLogin} = require('../controller/signincontroller.js')
+const { authAdmin, authUser, } = require('../middleware/auth.js')
+const {studentLogin, adminLogin} = require('../controller/signincontroller.js')
 const {studentvalidation, updatevalidation, paramsValidation, loginValidation, markValidation, subjectValidation, markUpdateValidation, subjectUpdateValidation, classValidation} = require('../middleware/joiValidationMiddleware.js')
 const {messageEncryDecry} = require('../controller/crypto-js.js')
 const {uploadingFiles} = require('../controller/aws.-s3.js')
@@ -17,21 +17,25 @@ const { addMarks, getMarks, getTotalMarks, getTotalParcentage, getAllToppers, ge
 const { checkIfSubjectAlreadyExists } = require('../middleware/subjectValidation.js');
 const { checkIfMarkAlreadyExists } = require('../middleware/markValidation.js');
 const { mailing } = require('../../nodemailer/nodemailer.js');
+const { isAdminOrStudent, isAdmin, checkIfAdminAlreadyExists } = require('../middleware/adminValidation.js');
+const { addAdmin, getAdmin } = require('../controller/admincontroller.js');
 
 // ------------------------------------------------------------------- routing starts -------------------------------------------
 
 // get requests ---------------------------------------------------------------------------------------------------------------------
-router.get('/getAllStudents', studentController.getStudents);
+router.get('/getAllStudents',  isAdminOrStudent, studentController.getStudents);
 
-router.get('/getAStudent/:id', paramsValidation, studentController.getStudentById);
+router.get('/getAStudent/:id',   paramsValidation, authUser, isAdminOrStudent, studentController.getStudentById);
 
-router.get('/getStudentList', studentController.fetchStudentList);
+router.get('/getStudentList',  isAdminOrStudent, studentController.fetchStudentList);
 
-router.get('/getClasses', classController.getClassDetails);
+router.get('/getClasses',  isAdminOrStudent, classController.getClassDetails);
 
-router.get('/getClass/:id', paramsValidation,  classController.getClass);
+router.get('/getClass/:id',   paramsValidation,  isAdmin,  classController.getClass);
 
-router.get('/fetchPincode/:pincode' , fetchPincode.fetchPincode);
+router.get('/getAdmin/:id', authAdmin, isAdmin, getAdmin)
+
+router.get('/fetchPincode/:pincode' ,  fetchPincode.fetchPincode);
 
 router.get('/encdec', messageEncryDecry);
 
@@ -39,49 +43,54 @@ router.get('/password', usingBcrypt);
 
 router.get('/uselambda', lambdaFunction);
 
-router.get('/getMarks', getMarks)
+router.get('/getMarks', isAdminOrStudent, getMarks)
 
-router.get('/getSubjects', getSubjects)
+router.get('/getSubjects', isAdminOrStudent, getSubjects)
 
-router.get('/getTotalMarks', getTotalMarks)
+router.get('/getTotalMarks', isAdminOrStudent, getTotalMarks)
 
-router.get('/getTotalPercentage', getTotalParcentage)
+router.get('/getTotalPercentage',  getTotalParcentage)
 
-router.get('/getTopper', getAllToppers)
+router.get('/getTopper', isAdminOrStudent, getAllToppers)
 
-router.get('/getAverageMarksInAClass', getAverageMarksOfAClass)
+router.get('/getAverageMarksInAClass',  isAdminOrStudent, getAverageMarksOfAClass)
 
 // post requests --------------------------------------------------------------------------------------------------------------------
-router.post('/addStudent', studentvalidation, checkIfStudentAlreadyExists,   studentController.addStudent);
+router.post('/addStudent', studentvalidation,  isAdmin,   checkIfStudentAlreadyExists, studentController.addStudent);
+
+router.post('/addAdmin', checkIfAdminAlreadyExists,  addAdmin )
 
 router.post('/login', loginValidation, studentLogin)
 
-router.post('/addClass', classValidation, classController.addClass);
+router.post ('/adminSignIn', adminLogin)
+
+router.post('/addClass', classValidation,  isAdmin, classController.addClass);
 
 router.post("/write-file-aws", uploadingFiles)
 
-router.post('/addSubject', subjectValidation,  checkIfSubjectAlreadyExists, addSubject)
+router.post('/addSubject', subjectValidation,  isAdmin,   checkIfSubjectAlreadyExists, addSubject)
 
-router.post('/addMark', markValidation, checkIfMarkAlreadyExists, addMarks)
+router.post('/addMark', markValidation,  isAdmin,  checkIfMarkAlreadyExists, addMarks)
 
 router.post('/mailing', mailing)
 
 // put requests ------------------------------------------------------------------------------------------------
-router.put('/udateStudent/:id',  paramsValidation, updatevalidation, authentication, studentNotFound, studentController.updateStudent);
+router.put('/udateStudent/:id',  paramsValidation, updatevalidation,  authUser , isAdmin,   studentNotFound, studentController.updateStudent);
 
-router.put('/updateMarks/:id', paramsValidation, markUpdateValidation,   updateMarks)
+router.put('/updateMarks/:id', paramsValidation, markUpdateValidation, authUser , isAdmin,  updateMarks)
 
-router.put('/updateSubject/:classId/:id', subjectUpdateValidation, updateSubject)
+router.put('/updateSubject/:classId/:id',  subjectUpdateValidation, authUser , isAdmin,  updateSubject)
 
 // delete requests --------------------------------------------------------------------------------------------------------------------
-router.delete('/deleteStudent/:id',  paramsValidation,  authentication,  studentNotFound, studentController.deleteStudent);
+router.delete('/deleteStudent/:id',  paramsValidation, authUser , isAdmin,  studentNotFound, studentController.deleteStudent);
 
-router.delete('/deleteSubject/:id', paramsValidation, deleteSubject)
+router.delete('/deleteSubject/:id', paramsValidation, authUser , isAdmin, deleteSubject)
 
-router.delete('/deleteMarks/:id', paramsValidation, deleteMarks)
+router.delete('/deleteMarks/:id', paramsValidation, authUser , isAdmin, deleteMarks)
 
-router.delete('/deleteAClass/:id', paramsValidation, classController.deleteAClass)
+router.delete('/deleteAClass/:id', paramsValidation, authUser , isAdmin, classController.deleteAClass)
 // -------------------------------------------------------------------- route not found --------------------------------------------------------------
+
 router.all('/*', (req, res) => {
     return res.status(404).json({
         message: 'Page not found'

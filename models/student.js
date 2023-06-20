@@ -15,6 +15,7 @@
   Pincode: DataTypes.STRING,
   PostOffice: DataTypes.JSON,
   createdAt : DataTypes.DATE,
+
 } ,{paranoid:true,
   timestamps:true})
   Student.associate = (models) => {
